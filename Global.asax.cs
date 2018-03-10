@@ -23,7 +23,11 @@ namespace SimpleEchoBot
                 builder =>
                 {
                     builder.RegisterModule(new AzureModule(Assembly.GetExecutingAssembly()));
-
+#if DEBUG
+                    ConfigurationManager.AppSettings["LuisAppId"] = "7c338de1-d1e0-45ac-b44d-290f68f5a008";
+                    ConfigurationManager.AppSettings["LuisAPIKey"] = "462b9fade9d2421890f561b307c81e25";
+                    ConfigurationManager.AppSettings["LuisAPIHostName"] = "westeurope.api.cognitive.microsoft.com";
+#else
                     // Using Azure Table Storage
                     var store = new TableBotDataStore(ConfigurationManager.AppSettings["AzureWebJobsStorage"]); // requires Microsoft.BotBuilder.Azure Nuget package 
 
@@ -35,7 +39,7 @@ namespace SimpleEchoBot
                         .Keyed<IBotDataStore<BotData>>(AzureModule.Key_DataStore)
                         .AsSelf()
                         .SingleInstance();
-
+#endif
                 });
             GlobalConfiguration.Configure(WebApiConfig.Register);
         }
