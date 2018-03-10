@@ -1,31 +1,36 @@
-﻿using System.Net;
-using System.Net.Http;
+using System;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Connector;
 
-namespace PorgBot
+using Microsoft.Bot.Connector;
+using Microsoft.Bot.Builder.Dialogs;
+using System.Web.Http.Description;
+using System.Net.Http;
+using System.Diagnostics;
+
+namespace Microsoft.Bot.Sample.LuisBot
 {
     [BotAuthentication]
     public class MessagesController : ApiController
     {
         /// <summary>
         /// POST: api/Messages
-        /// Receive a message from a user and reply to it
+        /// receive a message from a user and send replies
         /// </summary>
-        public async Task<HttpResponseMessage> Post([FromBody]Activity activity)
+        /// <param name="activity"></param>
+        [ResponseType(typeof(void))]
+        public virtual async Task<HttpResponseMessage> Post([FromBody] Activity activity)
         {
-            if (activity.Type == ActivityTypes.Message)
+            // check if activity is of type message
+            if (activity.GetActivityType() == ActivityTypes.Message)
             {
-                await Conversation.SendAsync(activity, () => new Dialogs.RootDialog());
+                await Conversation.SendAsync(activity, () => new BasicLuisDialog());
             }
             else
             {
                 HandleSystemMessage(activity);
             }
-            var response = Request.CreateResponse(HttpStatusCode.OK);
-            return response;
+            return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
         }
 
         private Activity HandleSystemMessage(Activity message)
