@@ -1,13 +1,11 @@
-using System;
-using System.Collections.Generic;
 using Autofac;
 using System.Web.Http;
 using System.Configuration;
 using System.Reflection;
 using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Builder.Dialogs.Internals;
 using Microsoft.Bot.Connector;
+using LuisBot;
 
 namespace SimpleEchoBot
 {
@@ -19,10 +17,20 @@ namespace SimpleEchoBot
             // We provide adapters for Azure Table, CosmosDb, SQL Azure, or you can implement your own!
             // For samples and documentation, see: https://github.com/Microsoft/BotBuilder-Azure
 
+            AutoMapper.Mapper.Initialize(cfg =>
+            {
+                cfg.CreateMap<IMessageActivity, SqlDataStore.Models.Activity>()
+                    .ForMember(dest => dest.FromId, opt => opt.MapFrom(src => src.From.Id))
+                    .ForMember(dest => dest.RecipientId, opt => opt.MapFrom(src => src.Recipient.Id))
+                    .ForMember(dest => dest.FromName, opt => opt.MapFrom(src => src.From.Name))
+                    .ForMember(dest => dest.RecipientName, opt => opt.MapFrom(src => src.Recipient.Name));
+            });
+
             Conversation.UpdateContainer(
-                builder =>
+                containerBuilder =>
                 {
-                    builder.RegisterModule(new AzureModule(Assembly.GetExecutingAssembly()));
+                    containerBuilder.RegisterType<EntityFrameworkActivityLogger>().AsImplementedInterfaces().InstancePerDependency();
+                    containerBuilder.RegisterModule(new AzureModule(Assembly.GetExecutingAssembly()));
 #if DEBUG
                     ConfigurationManager.AppSettings["LuisAppId"] = "7c338de1-d1e0-45ac-b44d-290f68f5a008";
                     ConfigurationManager.AppSettings["LuisAPIKey"] = "462b9fade9d2421890f561b307c81e25";
