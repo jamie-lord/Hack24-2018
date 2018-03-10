@@ -3,6 +3,7 @@ using Microsoft.Bot.Builder.FormFlow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace LuisBot.Models
@@ -49,6 +50,29 @@ namespace LuisBot.Models
             };
 
             return new FormBuilder<UserDetail>().Message("Hi! Welcome to PorgPowered salary bot")
+                .Field(nameof(Name))
+                .Field(nameof(Email),
+                validate: async (state, response) =>
+                {
+                    var result = new ValidateResult { IsValid = true, Value = response };
+                    var email = (response as string).Trim();
+                    Regex regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
+                    Match match = regex.Match(email);
+                    if (!match.Success)
+                    {
+                        result.Feedback = "Address is incorrect";
+                        result.IsValid = false;
+                    }
+                    return result;
+                }
+                )
+                .Field(nameof(PhoneNumber))
+                .Field(nameof(JobTitle))
+                .Field(nameof(Location))
+                .Field(nameof(Salary))
+                .Field(nameof(YearsOfXp))
+                .Field(nameof(Age))
+                .Field(nameof(Gender))
                 .OnCompletion(processOrder)
                 .Build();
         }
