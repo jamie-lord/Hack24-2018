@@ -38,7 +38,6 @@ namespace LuisBot.Models
         [Describe("Age")]
         [Template(TemplateUsage.NoPreference, "Skip")]
         public int? Age { get; set; }
-        [Optional]
         [Prompt("What is your {&}? {||}")]
         public GenderOptions? Gender { get; set; }        
 
@@ -60,7 +59,7 @@ namespace LuisBot.Models
                     Match match = regex.Match(email);
                     if (!match.Success)
                     {
-                        result.Feedback = "Address is incorrect";
+                        result.Feedback = "Email is incorrect";
                         result.IsValid = false;
                     }
                     return result;
