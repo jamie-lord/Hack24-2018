@@ -3,29 +3,37 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.FormFlow;
 using Microsoft.Bot.Connector;
+using PorgBot.Data;
 
 namespace PorgBot
 {
     [BotAuthentication]
     public class MessagesController : ApiController
     {
+
+        internal static IDialog<UserDetail> MakeRootDialog()
+        {
+            return Chain.From(() => FormDialog.FromForm(UserDetail.BuildForm));
+        }
+
         /// <summary>
         /// POST: api/Messages
         /// Receive a message from a user and reply to it
         /// </summary>
         public async Task<HttpResponseMessage> Post([FromBody]Activity activity)
-        {
-            if (activity.Type == ActivityTypes.Message)
+        {      
+            if (activity?.Type == ActivityTypes.Message)
             {
-                await Conversation.SendAsync(activity, () => new Dialogs.RootDialog());
+                await Conversation.SendAsync(activity, MakeRootDialog);
             }
             else
             {
                 HandleSystemMessage(activity);
             }
-            var response = Request.CreateResponse(HttpStatusCode.OK);
-            return response;
+
+            return Request.CreateResponse(HttpStatusCode.OK);
         }
 
         private Activity HandleSystemMessage(Activity message)
