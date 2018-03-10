@@ -6,17 +6,17 @@ using System.Web.Http;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.FormFlow;
 using Microsoft.Bot.Connector;
-using PorgBot.Data;
+//using PorgBot.Data;
 
 namespace PorgBot
 {
     [BotAuthentication]
     public class MessagesController : ApiController
     {
-        internal static IDialog<UserDetail> MakeRootDialog()
-        {
-            return Chain.From(() => FormDialog.FromForm(UserDetail.BuildForm));
-        }
+        //internal static IDialog<UserDetail> MakeRootDialog()
+        //{
+        //    return Chain.From(() => FormDialog.FromForm(UserDetail.BuildForm));
+        //}
 
         /// <summary>
         /// POST: api/Messages
@@ -26,7 +26,7 @@ namespace PorgBot
         {      
             if (activity?.Type == ActivityTypes.Message)
             {
-                await Conversation.SendAsync(activity, MakeRootDialog);
+                //await Conversation.SendAsync(activity, MakeRootDialog);
             }
             else
             {
