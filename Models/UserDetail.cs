@@ -40,7 +40,7 @@ namespace LuisBot.Models
         {
             OnCompletionAsyncDelegate<UserDetail> processOrder = async (context, state) =>
             {
-                await context.PostAsync("Your PorgPowered Salary bot Has Been Successfully Completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May Be the Porg With you!!! :)");
+                await context.PostAsync("Your PorgPowered Salary bot Has Been Successfully Completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
             };
 
             return new FormBuilder<UserDetail>().Message("Hi! Welcome to PorgPowered salary bot")
