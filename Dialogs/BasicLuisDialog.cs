@@ -45,6 +45,12 @@ namespace Microsoft.Bot.Sample.LuisBot
             await this.ShowLuisResult(context, result);
         }
 
+        [LuisIntent("Utilities")]
+        public async Task HelpIntent(IDialogContext context, LuisResult result)
+        {
+            await this.ShowLuisResult(context, result);
+        }
+
         private async Task ShowLuisResult(IDialogContext context, LuisResult result) 
         {
             await context.PostAsync($"You have reached {result.Intents[0].Intent}. You said: {result.Query}");
