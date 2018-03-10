@@ -1,8 +1,9 @@
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
-
+using LuisBot.Models;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.FormFlow;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 
@@ -49,6 +50,20 @@ namespace Microsoft.Bot.Sample.LuisBot
         public async Task UtilitiesIntent(IDialogContext context, LuisResult result)
         {
             await this.ShowLuisResult(context, result);
+        }
+
+        [LuisIntent("StartSalaryQuery")]
+        public async Task StartSalaryQueryIntent(IDialogContext context, LuisResult result)
+        {
+            await context.PostAsync("Please wait while we load the Salary Calculator...");
+
+            var formDialog = new FormDialog<UserDetail>(new UserDetail(), UserDetail.BuildForm);
+            context.Call(formDialog, ResumeAfterSalaryQueryDialog);
+        }
+
+        private async Task ResumeAfterSalaryQueryDialog(IDialogContext context, IAwaitable<UserDetail> result)
+        {
+            await context.PostAsync("Thanks, I'll just work out how well you get paid...");
         }
 
         private async Task ShowLuisResult(IDialogContext context, LuisResult result) 

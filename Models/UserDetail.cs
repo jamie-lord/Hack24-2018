@@ -11,23 +11,27 @@ namespace LuisBot.Models
     {
         public enum GenderOptions
         {
-            Male, Female, Other, Unspecified
+            Male, Female, Other, Skip
         };
-        [Pattern("/(.*[a-z]){3,}/i")]
-        [Prompt("What is your name?")]
+
+        [Prompt("What is your {&}?")]
         public string Name { get; set; }
         [Prompt("Where do you work?")]
         public string Location { get; set; }
-        [Prompt("What is your salary? (£)")]
+        [Prompt("What is your {&}? (£)")]
         public double Salary { get; set; }
         [Optional]
         [Prompt("How many years of experience do you have?")]
+        [Describe("Years of Experience")]
+        [Template(TemplateUsage.NoPreference, "Skip")]
         public int? YearsOfXp { get; set; }
         [Optional]
         [Prompt("How old are you?")]
+        [Describe("Age")]
+        [Template(TemplateUsage.NoPreference, "Skip")]
         public int? Age { get; set; }
         [Optional]
-        [Prompt("What is your gender?")]
+        [Prompt("What is your {&}? {||}")]
         public GenderOptions? Gender { get; set; }
 
         public static IForm<UserDetail> BuildForm()
