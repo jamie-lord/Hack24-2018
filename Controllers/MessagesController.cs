@@ -7,12 +7,19 @@ using Microsoft.Bot.Builder.Dialogs;
 using System.Web.Http.Description;
 using System.Net.Http;
 using System.Diagnostics;
+using LuisBot.Models;
+using Microsoft.Bot.Builder.FormFlow;
 
 namespace Microsoft.Bot.Sample.LuisBot
 {
     [BotAuthentication]
     public class MessagesController : ApiController
     {
+        internal static IDialog<UserDetail> MakeUserDetailDialog()
+        {
+            return Chain.From(() => FormDialog.FromForm(UserDetail.BuildForm));
+        }
+
         /// <summary>
         /// POST: api/Messages
         /// receive a message from a user and send replies
@@ -25,6 +32,10 @@ namespace Microsoft.Bot.Sample.LuisBot
             if (activity.GetActivityType() == ActivityTypes.Message)
             {
                 await Conversation.SendAsync(activity, () => new BasicLuisDialog());
+
+                // The following is for FormFlow dialog.
+                // TODO: uncomment when we can
+                //await Conversation.SendAsync(activity, MakeUserDetailDialog);
             }
             else
             {
