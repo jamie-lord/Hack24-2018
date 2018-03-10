@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
+using Microsoft.Bot.Connector;
 
 namespace Microsoft.Bot.Sample.LuisBot
 {
@@ -49,6 +50,19 @@ namespace Microsoft.Bot.Sample.LuisBot
         public async Task UtilitiesIntent(IDialogContext context, LuisResult result)
         {
             await this.ShowLuisResult(context, result);
+        }
+
+        [LuisIntent("Porg")]
+        public async Task PorgIntent(IDialogContext context, LuisResult result)
+        {
+            var resultMessage = context.MakeMessage();
+
+            resultMessage.Attachments.Add(new Attachment()
+            {
+                ContentUrl = "https://nerdist.com/wp-content/uploads/2017/12/porg-yell.gif",
+                ContentType = "image/png"
+            });
+            await context.PostAsync(resultMessage);
         }
 
         private async Task ShowLuisResult(IDialogContext context, LuisResult result) 
