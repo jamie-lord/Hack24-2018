@@ -13,15 +13,21 @@ namespace LuisBot.Models
         {
             Male, Female, Other, Unspecified
         };
-
-
-        public int Id { get; set; }
-
+        [Pattern("/(.*[a-z]){3,}/i")]
+        [Prompt("What is your name?")]
         public string Name { get; set; }
+        [Prompt("Where do you work?")]
         public string Location { get; set; }
+        [Prompt("What is your salary? (£)")]
         public double Salary { get; set; }
+        [Optional]
+        [Prompt("How many years of experience do you have?")]
         public int? YearsOfXp { get; set; }
+        [Optional]
+        [Prompt("How old are you?")]
         public int? Age { get; set; }
+        [Optional]
+        [Prompt("What is your gender?")]
         public GenderOptions? Gender { get; set; }
 
         public static IForm<UserDetail> BuildForm()
