@@ -47,7 +47,7 @@ namespace Microsoft.Bot.Sample.LuisBot
         }
 
         [LuisIntent("Utilities")]
-        public async Task UtilitiesIntent(IDialogContext context, LuisResult result)
+        public async Task HelpIntent(IDialogContext context, LuisResult result)
         {
             await this.ShowLuisResult(context, result);
         }
