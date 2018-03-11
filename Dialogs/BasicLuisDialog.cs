@@ -47,7 +47,7 @@ namespace Microsoft.Bot.Sample.LuisBot
         public async Task GreetingIntent(IDialogContext context, LuisResult result)
         {
             if (!ShouldBotReply(context)) return;
-            await this.ShowLuisResult(context, result);
+            await context.PostAsync("Hello! How can I help?");
         }
 
         [LuisIntent("Cancel")]
@@ -70,6 +70,7 @@ namespace Microsoft.Bot.Sample.LuisBot
             if (!ShouldBotReply(context)) return;
             var resultMessage = context.MakeMessage();
 
+            string lowResImage = null;
             string image = null;
             var query = result.Entities.FirstOrDefault()?.Entity;
             if (!string.IsNullOrWhiteSpace(query))
@@ -83,7 +84,10 @@ namespace Microsoft.Bot.Sample.LuisBot
                     };
                     // Returns gif results
                     var gifResult = await giphy.GifSearch(searchParameter);
-                    image = gifResult.Data.FirstOrDefault()?.Images.Original.Url;
+                    Random rand = new Random();
+                    int resultIdx = rand.Next(gifResult.Data.Length - 1);
+                    image = gifResult.Data[resultIdx].Images.Original.Url;
+                    lowResImage = gifResult.Data[resultIdx].Images.DownsizedStill?.Url ?? image;
                 }
                 catch (Exception e)
                 {
@@ -101,7 +105,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                 {
                     Title = query,
                     Subtitle = "Powered by Giphy",
-                    Image = new ThumbnailUrl { Url = image },
+                    Image = new ThumbnailUrl { Url = lowResImage },
                     Media = new List<MediaUrl>
                     {
                         new MediaUrl()
