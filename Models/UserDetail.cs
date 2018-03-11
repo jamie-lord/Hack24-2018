@@ -43,10 +43,10 @@ namespace LuisBot.Models
 
         public static IForm<UserDetail> BuildForm()
         {
-            OnCompletionAsyncDelegate<UserDetail> processOrder = async (context, state) =>
-            {
-                await context.PostAsync("Your PorgPowered Salary bot Has Been Successfully Completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
-            };
+            //OnCompletionAsyncDelegate<UserDetail> processOrder = async (context, state) =>
+            //{
+            //    await context.PostAsync("Your PorgPowered Salary bot Has Been Successfully Completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
+            //};
 
             return new FormBuilder<UserDetail>().Message("Hi! Welcome to PorgPowered salary bot")
                 .Field(nameof(Name))
@@ -72,7 +72,7 @@ namespace LuisBot.Models
                 .Field(nameof(YearsOfXp))
                 .Field(nameof(Age))
                 .Field(nameof(Gender))
-                .OnCompletion(processOrder)
+                //.OnCompletion(processOrder)
                 .Build();
         }
     }
