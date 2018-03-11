@@ -63,8 +63,6 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("StartSalaryQuery")]
         public async Task StartSalaryQueryIntent(IDialogContext context, LuisResult result)
         {
-            await context.PostAsync("Please wait while we load the PorgPowered Salary Calculator...");
-
             var formDialog = new FormDialog<UserDetail>(new UserDetail(), UserDetail.BuildForm, FormOptions.PromptInStart, result.Entities);
             context.Call(formDialog, ResumeAfterSalaryQueryDialog);
         }
@@ -74,7 +72,6 @@ namespace Microsoft.Bot.Sample.LuisBot
             try
             {
                 var salaryQuery = await result;
-                //if (salaryQuery.)
 
                 await context.PostAsync("Your PorgPowered survey has been successfully completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
             }
