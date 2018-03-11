@@ -21,7 +21,6 @@ namespace LuisBot.Models
 
         [Prompt("What's your first name?")]
         public string Name { get; set; }
-        [Pattern(@"^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$")]
         [Prompt("Great {Name:string}, now I need your email address?")]
         public string Email { get; set; }
         [Prompt("What is your phone number {Name:string}?")]
