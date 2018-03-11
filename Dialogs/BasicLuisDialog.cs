@@ -244,6 +244,16 @@ namespace Microsoft.Bot.Sample.LuisBot
             return card;
         }
 
+        [LuisIntent("Farewells")]
+        public async Task FareWellIntent(IDialogContext context, LuisResult result)
+        {
+            LuisResult luisResult = new LuisResult("Bye!", new List<EntityRecommendation>()
+            {
+                new EntityRecommendation { Entity = "Bye!" }
+            });
+            await ImageIntent(context, luisResult);
+        }
+
         [LuisIntent("StartSalaryQuery")]
         public async Task StartSalaryQueryIntent(IDialogContext context, LuisResult result)
         {
