@@ -32,7 +32,6 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("None")]
         public async Task NoneIntent(IDialogContext context, LuisResult result)
         {
-            if (!ShouldBotReply(context)) return;
             StringBuilder noComprendeSB = new StringBuilder("Sorry, I didn't understand");
             if (!string.IsNullOrWhiteSpace(result?.Query))
             {
@@ -48,28 +47,24 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("Greeting")]
         public async Task GreetingIntent(IDialogContext context, LuisResult result)
         {
-            if (!ShouldBotReply(context)) return;
             await this.ShowLuisResult(context, result);
         }
 
         [LuisIntent("Cancel")]
         public async Task CancelIntent(IDialogContext context, LuisResult result)
         {
-            if (!ShouldBotReply(context)) return;
             await this.ShowLuisResult(context, result);
         }
 
         [LuisIntent("Help")]
         public async Task HelpIntent(IDialogContext context, LuisResult result)
         {
-            if (!ShouldBotReply(context)) return;
             await this.ShowLuisResult(context, result);
         }
 
         [LuisIntent("Image/Gif")]
         public async Task ImageIntent(IDialogContext context, LuisResult result)
         {
-            if (!ShouldBotReply(context)) return;
             var resultMessage = context.MakeMessage();
 
             string image = null;
@@ -112,7 +107,6 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("StartSalaryQuery")]
         public async Task StartSalaryQueryIntent(IDialogContext context, LuisResult result)
         {
-            if (!ShouldBotReply(context)) return;
             var formDialog = new FormDialog<UserDetail>(new UserDetail(), UserDetail.BuildForm, FormOptions.PromptInStart, result.Entities);
             context.Call(formDialog, ResumeAfterSalaryQueryDialog);
         }
@@ -192,15 +186,6 @@ namespace Microsoft.Bot.Sample.LuisBot
         {
             await context.PostAsync($"You have reached {result.Intents[0].Intent}. You said: {result.Query}");
             context.Wait(MessageReceived);
-        }
-
-        private bool ShouldBotReply(IDialogContext context)
-        {
-            Activity ac = context.Activity as Activity;
-            bool willReply = context.Activity.Conversation.IsGroup == true && (ac?.MentionsRecipient() == true);
-            willReply = willReply || context.Activity.Conversation.IsGroup == null || context.Activity.Conversation.IsGroup == false;
-            ac?.RemoveMentionText(ac?.Recipient?.Id);
-            return willReply;
         }
     }
 }
