@@ -141,6 +141,16 @@ namespace Microsoft.Bot.Sample.LuisBot
             await context.PostAsync(resultMessage);
         }
 
+        [LuisIntent("Show me your horse")]
+        public async Task AmazingHorseIntent(IDialogContext context, LuisResult result)
+        {
+            var resultMessage = context.MakeMessage();
+
+            resultMessage.Attachments.Add(new VideoCard(title: "LOOK AT MY HORSE!", autoloop: true, autostart: true, media: new List<MediaUrl> { new MediaUrl("https://www.youtube.com/watch?v=O3rpmctmC_M") }).ToAttachment());
+
+            await context.PostAsync(resultMessage);
+        }
+
         [LuisIntent("StartSalaryQuery")]
         public async Task StartSalaryQueryIntent(IDialogContext context, LuisResult result)
         {
