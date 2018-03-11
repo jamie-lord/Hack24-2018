@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text;
@@ -96,11 +97,19 @@ namespace Microsoft.Bot.Sample.LuisBot
             }
             else
             {
-                resultMessage.Attachments.Add(new Attachment()
+                resultMessage.Attachments.Add(new AnimationCard()
                 {
-                    ContentUrl = image,
-                    ContentType = "image/png"
-                });
+                    Title = query,
+                    Subtitle = "Powered by Giphy",
+                    Image = new ThumbnailUrl { Url = image },
+                    Media = new List<MediaUrl>
+                    {
+                        new MediaUrl()
+                        {
+                            Url = image
+                        }
+                    }
+                }.ToAttachment());
             }
 
             await context.PostAsync(resultMessage);
