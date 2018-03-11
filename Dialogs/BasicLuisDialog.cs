@@ -1,6 +1,7 @@
 using System;
 using System.Configuration;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using GiphyDotNet.Manager;
 using GiphyDotNet.Model.Parameters;
@@ -24,10 +25,18 @@ namespace Microsoft.Bot.Sample.LuisBot
         {
         }
 
+        [LuisIntent("")]
         [LuisIntent("None")]
         public async Task NoneIntent(IDialogContext context, LuisResult result)
         {
-            await this.ShowLuisResult(context, result);
+            StringBuilder noComprendeSB = new StringBuilder("Sorry, I didn't understand");
+            if (!string.IsNullOrWhiteSpace(result?.Query))
+            {
+                noComprendeSB.Append($" what you meant when you said \"{result.Query}\"");
+            }
+
+            await context.PostAsync(noComprendeSB.ToString());
+            await context.PostAsync("Please try a different term or phrase.");
         }
 
         // Go to https://luis.ai and create a new intent, then train/publish your luis app.
