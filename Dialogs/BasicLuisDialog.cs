@@ -44,9 +44,10 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("Greeting")]
         public async Task GreetingIntent(IDialogContext context, LuisResult result)
         {
-            await context.PostAsync("ChannelId: " + context.Activity.ChannelId);
-            await context.PostAsync("Conversation.IsGroup: " + context.Activity.Conversation.IsGroup);
-            await context.PostAsync("Recipient: " + context.Activity.Recipient);
+            if (context.Activity.Conversation.IsGroup == true && (context.Activity is Activity ac))
+            {
+                await context.PostAsync("Mentioned: " + ac.MentionsRecipient());
+            }
             await this.ShowLuisResult(context, result);
         }
 
