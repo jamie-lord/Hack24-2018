@@ -33,6 +33,22 @@ namespace Microsoft.Bot.Sample.LuisBot
         public async Task NoneIntent(IDialogContext context, LuisResult result)
         {
             if (!ShouldBotReply(context)) return;
+
+            var resultMessage = context.MakeMessage();
+
+            string image = await GetGif("say what");
+
+            if (!string.IsNullOrWhiteSpace(image))
+            {
+                resultMessage.Attachments.Add(new Attachment()
+                {
+                    ContentUrl = image,
+                    ContentType = "image/png"
+                });
+            }
+
+            await context.PostAsync(resultMessage);
+
             StringBuilder noComprendeSB = new StringBuilder("Sorry, I didn't understand");
             if (!string.IsNullOrWhiteSpace(result?.Query))
             {
@@ -53,22 +69,7 @@ namespace Microsoft.Bot.Sample.LuisBot
 
             var resultMessage = context.MakeMessage();
 
-            string image = null;
-            try
-            {
-                var giphy = new Giphy("oZy0HYzaXNCmrq0dNOGyiuZgyaaTc3hL");
-                var searchParameter = new SearchParameter()
-                {
-                    Query = "porg"
-                };
-                // Returns gif results
-                var gifResult = await giphy.GifSearch(searchParameter);
-                image = gifResult.Data?[new Random().Next(0, gifResult.Data.Length + 1)]?.Images.Original.Url;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            string image = await GetGif("porg");
 
             if (!string.IsNullOrWhiteSpace(image))
             {
@@ -80,6 +81,27 @@ namespace Microsoft.Bot.Sample.LuisBot
             }
 
             await context.PostAsync(resultMessage);
+        }
+
+        private async Task<string> GetGif(string searchFor)
+        {
+            try
+            {
+                var giphy = new Giphy("oZy0HYzaXNCmrq0dNOGyiuZgyaaTc3hL");
+                var searchParameter = new SearchParameter()
+                {
+                    Query = searchFor
+                };
+                // Returns gif results
+                var gifResult = await giphy.GifSearch(searchParameter);
+                return gifResult.Data?[new Random().Next(0, gifResult.Data.Length + 1)]?.Images.Original.Url;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return null;
         }
 
         [LuisIntent("Cancel")]
@@ -104,23 +126,10 @@ namespace Microsoft.Bot.Sample.LuisBot
 
             string image = null;
             var query = result.Entities.FirstOrDefault()?.Entity;
+
             if (!string.IsNullOrWhiteSpace(query))
             {
-                try
-                {
-                    var giphy = new Giphy("oZy0HYzaXNCmrq0dNOGyiuZgyaaTc3hL");
-                    var searchParameter = new SearchParameter()
-                    {
-                        Query = query
-                    };
-                    // Returns gif results
-                    var gifResult = await giphy.GifSearch(searchParameter);
-                    image = gifResult.Data?[new Random().Next(0, gifResult.Data.Length + 1)]?.Images.Original.Url;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
+                image = await GetGif(query);
             }
 
             if (string.IsNullOrWhiteSpace(image))
