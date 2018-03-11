@@ -62,14 +62,16 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("Image/Gif")]
         public async Task ImageIntent(IDialogContext context, LuisResult result)
         {
-            var resultMessage = context.MakeMessage();
-
-            string image = null;
-            var query = result.Entities.FirstOrDefault()?.Entity;
-            if (!string.IsNullOrWhiteSpace(query))
+            try
             {
-                try
+                var resultMessage = context.MakeMessage();
+
+                string image = null;
+                var query = result.Entities.FirstOrDefault()?.Entity;
+                if (!string.IsNullOrWhiteSpace(query))
                 {
+                    //try
+                    //{
                     var giphy = new Giphy("oZy0HYzaXNCmrq0dNOGyiuZgyaaTc3hL");
                     var searchParameter = new SearchParameter()
                     {
@@ -78,27 +80,33 @@ namespace Microsoft.Bot.Sample.LuisBot
                     // Returns gif results
                     var gifResult = await giphy.GifSearch(searchParameter);
                     image = gifResult.Data.FirstOrDefault()?.Images.Original.Url;
+                    //}
+                    //catch (Exception e)
+                    //{
+                    //  Console.WriteLine(e);
+                    //}
                 }
-                catch (Exception e)
+
+                if (string.IsNullOrWhiteSpace(image))
                 {
-                    Console.WriteLine(e);
+                    resultMessage.Text = "Hmmmm, I couldn't find an image for that. Sorry";
                 }
-            }
-
-            if (string.IsNullOrWhiteSpace(image))
-            {
-                resultMessage.Text = "Hmmmm, I couldn't find an image for that. Sorry";
-            }
-            else
-            {
-                resultMessage.Attachments.Add(new Attachment()
+                else
                 {
-                    ContentUrl = image,
-                    ContentType = "image/png"
-                });
-            }
+                    resultMessage.Attachments.Add(new Attachment()
+                    {
+                        ContentUrl = image,
+                        ContentType = "image/png"
+                    });
+                }
 
-            await context.PostAsync(resultMessage);
+                await context.PostAsync(resultMessage);
+            }
+            catch (Exception ex)
+            {
+                await context.PostAsync("Damn! I failed at getting a gif...");
+                await context.PostAsync(ex.StackTrace);
+            }
         }
 
         [LuisIntent("StartSalaryQuery")]
