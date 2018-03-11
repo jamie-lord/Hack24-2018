@@ -32,7 +32,7 @@ namespace LuisBot.Models
         [Prompt("How much do you earn being a {JobTitle:string}?")]
         public double Salary { get; set; }
         [Optional]
-        [Prompt("How long have you worked in {Location:string}?")]
+        [Prompt("How many years have you worked in {Location:string}?")]
         [Describe("Years of Experience")]
         [Template(TemplateUsage.NoPreference, "Skip")]
         public int? YearsOfXp { get; set; }
