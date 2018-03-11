@@ -1,7 +1,12 @@
 using System;
 using System.Configuration;
+using System.Linq;
 using System.Threading.Tasks;
+using GiphyDotNet.Manager;
+using GiphyDotNet.Model.Parameters;
+using LuisBot.Models;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.FormFlow;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
@@ -13,8 +18,8 @@ namespace Microsoft.Bot.Sample.LuisBot
     public class BasicLuisDialog : LuisDialog<object>
     {
         public BasicLuisDialog() : base(new LuisService(new LuisModelAttribute(
-            ConfigurationManager.AppSettings["LuisAppId"], 
-            ConfigurationManager.AppSettings["LuisAPIKey"], 
+            ConfigurationManager.AppSettings["LuisAppId"],
+            ConfigurationManager.AppSettings["LuisAPIKey"],
             domain: ConfigurationManager.AppSettings["LuisAPIHostName"])))
         {
         }
@@ -45,20 +50,63 @@ namespace Microsoft.Bot.Sample.LuisBot
             await this.ShowLuisResult(context, result);
         }
 
-        [LuisIntent("Porg")]
-        public async Task PorgIntent(IDialogContext context, LuisResult result)
+        [LuisIntent("Image/Gif")]
+        public async Task ImageIntent(IDialogContext context, LuisResult result)
         {
             var resultMessage = context.MakeMessage();
 
-            resultMessage.Attachments.Add(new Attachment()
+            string image = null;
+            var query = result.Entities.FirstOrDefault()?.Entity;
+            if (!string.IsNullOrWhiteSpace(query))
             {
-                ContentUrl = "https://nerdist.com/wp-content/uploads/2017/12/porg-yell.gif",
-                ContentType = "image/png"
-            });
+                try
+                {
+                    var giphy = new Giphy("oZy0HYzaXNCmrq0dNOGyiuZgyaaTc3hL");
+                    var searchParameter = new SearchParameter()
+                    {
+                        Query = query
+                    };
+                    // Returns gif results
+                    var gifResult = await giphy.GifSearch(searchParameter);
+                    image = gifResult.Data.FirstOrDefault()?.Images.Original.Url;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(image))
+            {
+                resultMessage.Text = "Hmmmm, I couldn't find an image for that. Sorry";
+            }
+            else
+            {
+                resultMessage.Attachments.Add(new Attachment()
+                {
+                    ContentUrl = image,
+                    ContentType = "image/png"
+                });
+            }
+
             await context.PostAsync(resultMessage);
         }
 
-        private async Task ShowLuisResult(IDialogContext context, LuisResult result) 
+        [LuisIntent("StartSalaryQuery")]
+        public async Task StartSalaryQueryIntent(IDialogContext context, LuisResult result)
+        {
+            await context.PostAsync("Please wait while we load the Salary Calculator...");
+
+            var formDialog = new FormDialog<UserDetail>(new UserDetail(), UserDetail.BuildForm);
+            context.Call(formDialog, ResumeAfterSalaryQueryDialog);
+        }
+
+        private async Task ResumeAfterSalaryQueryDialog(IDialogContext context, IAwaitable<UserDetail> result)
+        {
+            await context.PostAsync("Thanks, I'll just work out how well you get paid...");
+        }
+
+        private async Task ShowLuisResult(IDialogContext context, LuisResult result)
         {
             await context.PostAsync($"You have reached {result.Intents[0].Intent}. You said: {result.Query}");
             context.Wait(MessageReceived);

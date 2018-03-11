@@ -1,4 +1,5 @@
-﻿using Microsoft.Bot.Builder.FormFlow;
+﻿using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.FormFlow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,22 +12,45 @@ namespace LuisBot.Models
     {
         public enum GenderOptions
         {
-            Male, Female, Other, Unspecified
+            Male, Female, Other, Skip
         };
 
-
-        public int Id { get; set; }
-
+        [Prompt("What is your {&}?")]
         public string Name { get; set; }
+        [Prompt("What is your email?")]
+        public string Email { get; set; }
+        [Prompt("What is your phone number?")]
+        public double PhoneNumber { get; set; }
+        [Prompt("What's your job title?")]
+        public string JobTitle { get; set; }
+        [Prompt("Where do you work?")]
         public string Location { get; set; }
+        [Prompt("What is your {&}? (£)")]
         public double Salary { get; set; }
+        [Optional]
+        [Prompt("How many years of experience do you have?")]
+        [Describe("Years of Experience")]
+        [Template(TemplateUsage.NoPreference, "Skip")]
         public int? YearsOfXp { get; set; }
+        [Optional]
+        [Prompt("How old are you?")]
+        [Describe("Age")]
+        [Template(TemplateUsage.NoPreference, "Skip")]
         public int? Age { get; set; }
-        public GenderOptions? Gender { get; set; }
+        [Optional]
+        [Prompt("What is your {&}? {||}")]
+        public GenderOptions? Gender { get; set; }        
 
         public static IForm<UserDetail> BuildForm()
         {
-            return new FormBuilder<UserDetail>().Message("Hi! Welcome to PorgPowered salary bot").Build();
+            OnCompletionAsyncDelegate<UserDetail> processOrder = async (context, state) =>
+            {
+                await context.PostAsync("Your PorgPowered Salary bot Has Been Successfully Completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
+            };
+
+            return new FormBuilder<UserDetail>().Message("Hi! Welcome to PorgPowered salary bot")
+                .OnCompletion(processOrder)
+                .Build();
         }
     }
 }
