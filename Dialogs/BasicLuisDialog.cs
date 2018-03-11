@@ -153,7 +153,10 @@ namespace Microsoft.Bot.Sample.LuisBot
             Activity ac = context.Activity as Activity;
             bool willReply = context.Activity.Conversation.IsGroup == true && (ac?.MentionsRecipient() == true);
             willReply = willReply || context.Activity.Conversation.IsGroup == null || context.Activity.Conversation.IsGroup == false;
-            ac?.RemoveMentionText(ac?.Recipient?.Id);
+            if (ac != null)
+            {
+                ac.Text = ac.RemoveMentionText(ac.Recipient.Id);
+            }
             return willReply;
         }
     }
