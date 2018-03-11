@@ -24,6 +24,7 @@ namespace SimpleEchoBot
             AutoMapper.Mapper.Initialize(cfg =>
             {
                 cfg.CreateMap<IMessageActivity, SqlDataStore.Models.Activity>()
+                    .ForMember(dest => dest.Id, opt => opt.Ignore())
                     .ForMember(dest => dest.FromId, opt => opt.MapFrom(src => src.From.Id))
                     .ForMember(dest => dest.RecipientId, opt => opt.MapFrom(src => src.Recipient.Id))
                     .ForMember(dest => dest.FromName, opt => opt.MapFrom(src => src.From.Name))

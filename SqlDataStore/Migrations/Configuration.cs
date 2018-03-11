@@ -5,14 +5,14 @@ namespace SqlDataStore.Migrations
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<SqlDataStore.ConversationDataContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<SqlDataStore.DataContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(SqlDataStore.ConversationDataContext context)
+        protected override void Seed(SqlDataStore.DataContext context)
         {
             //  This method will be called after migrating to the latest version.
 

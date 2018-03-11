@@ -120,6 +120,12 @@ namespace Microsoft.Bot.Sample.LuisBot
             {
                 var salaryQuery = await result;
 
+                using (SqlDataStore.DataContext dataContext = new SqlDataStore.DataContext())
+                {
+                    dataContext.UserDetails.Add(salaryQuery);
+                    dataContext.SaveChanges();
+                }
+
                 await context.PostAsync("Your PorgPowered survey has been successfully completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
             }
             catch(FormCanceledException ex)

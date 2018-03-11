@@ -1,10 +1,9 @@
-﻿using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Builder.FormFlow;
+﻿using Microsoft.Bot.Builder.FormFlow;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity.ModelConfiguration.Configuration;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace LuisBot.Models
 {
@@ -15,6 +14,10 @@ namespace LuisBot.Models
         {
             Male, Female, Other, Skip
         };
+
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }
 
         [Prompt("What is your {&}?")]
         public string Name { get; set; }
@@ -39,7 +42,7 @@ namespace LuisBot.Models
         [Template(TemplateUsage.NoPreference, "Skip")]
         public int? Age { get; set; }
         [Prompt("What is your {&}? {||}")]
-        public GenderOptions? Gender { get; set; }        
+        public GenderOptions? Gender { get; set; }
 
         public static IForm<UserDetail> BuildForm()
         {
