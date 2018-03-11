@@ -62,16 +62,14 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("Image/Gif")]
         public async Task ImageIntent(IDialogContext context, LuisResult result)
         {
-            try
-            {
-                var resultMessage = context.MakeMessage();
+            var resultMessage = context.MakeMessage();
 
-                string image = null;
-                var query = result.Entities.FirstOrDefault()?.Entity;
-                if (!string.IsNullOrWhiteSpace(query))
+            string image = null;
+            var query = result.Entities.FirstOrDefault()?.Entity;
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                try
                 {
-                    //try
-                    //{
                     var giphy = new Giphy("oZy0HYzaXNCmrq0dNOGyiuZgyaaTc3hL");
                     var searchParameter = new SearchParameter()
                     {
@@ -80,33 +78,27 @@ namespace Microsoft.Bot.Sample.LuisBot
                     // Returns gif results
                     var gifResult = await giphy.GifSearch(searchParameter);
                     image = gifResult.Data.FirstOrDefault()?.Images.Original.Url;
-                    //}
-                    //catch (Exception e)
-                    //{
-                    //  Console.WriteLine(e);
-                    //}
                 }
-
-                if (string.IsNullOrWhiteSpace(image))
+                catch (Exception e)
                 {
-                    resultMessage.Text = "Hmmmm, I couldn't find an image for that. Sorry";
+                    Console.WriteLine(e);
                 }
-                else
-                {
-                    resultMessage.Attachments.Add(new Attachment()
-                    {
-                        ContentUrl = image,
-                        ContentType = "image/png"
-                    });
-                }
-
-                await context.PostAsync(resultMessage);
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrWhiteSpace(image))
             {
-                await context.PostAsync("Damn! I failed at getting a gif...");
-                await context.PostAsync(ex.StackTrace);
+                resultMessage.Text = "Hmmmm, I couldn't find an image for that. Sorry";
             }
+            else
+            {
+                resultMessage.Attachments.Add(new Attachment()
+                {
+                    ContentUrl = image,
+                    ContentType = "image/png"
+                });
+            }
+
+            await context.PostAsync(resultMessage);
         }
 
         [LuisIntent("StartSalaryQuery")]
