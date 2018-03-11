@@ -168,8 +168,34 @@ namespace Microsoft.Bot.Sample.LuisBot
                 new EntityRecommendation { Entity = "Saw play a game" }
             });
             await ImageIntent(context, luisResult);
+
+            var formDialog = new FormDialog<MillionaireGame>(new MillionaireGame(), MillionaireGame.BuildForm, FormOptions.PromptInStart, result.Entities);
+            context.Call(formDialog, ResumeAfterGameDialog);
         }
 
+        private async Task ResumeAfterGameDialog(IDialogContext context, IAwaitable<MillionaireGame> result)
+        {
+            try
+            {
+                var gameQuery = await result;
+            }
+            catch (FormCanceledException e)
+            {
+                int questionStep = -1;
+                if (e.Message.ToLowerInvariant().Equals("form quit."))
+                {
+                    await context.PostAsync("You quit? Really? Shame on you!");
+                }
+                else if (Int32.TryParse(e.Message, out questionStep))
+                {
+                    await context.PostAsync($"Oh dear oh dear. You couldn't get past question {questionStep}!");
+                }
+            }
+            finally
+            {
+                context.Done<object>(null);
+            }
+        }
         private async Task ResumeAfterSalaryQueryDialog(IDialogContext context, IAwaitable<UserDetail> result)
         {
             try
