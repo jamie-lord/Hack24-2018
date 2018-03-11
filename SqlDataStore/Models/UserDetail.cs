@@ -21,23 +21,24 @@ namespace LuisBot.Models
 
         [Prompt("What's your first name?")]
         public string Name { get; set; }
-        [Prompt("Now I need your email address?")]
+        [Pattern(@"^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$")]
+        [Prompt("Great {Name:string}, now I need your email address?")]
         public string Email { get; set; }
-        [Prompt("What is your phone number?")]
+        [Prompt("What is your phone number {Name:string}?")]
         public double PhoneNumber { get; set; }
-        [Prompt("What's your job title?")]
+        [Prompt("Ok {Name:string}, What's your job title?")]
         public string JobTitle { get; set; }
         [Prompt("Where is your work place?")]
         public string Location { get; set; }
-        [Prompt("How much do you earn?")]
+        [Prompt("How much do you earn being a {JobTitle:string}?")]
         public double Salary { get; set; }
         [Optional]
-        [Prompt("How long have you worked there?")]
+        [Prompt("How long have you worked in {Location:string}?")]
         [Describe("Years of Experience")]
         [Template(TemplateUsage.NoPreference, "Skip")]
         public int? YearsOfXp { get; set; }
         [Optional]
-        [Prompt("How old are you?")]
+        [Prompt("How old are you {Name:string}?")]
         [Describe("Age")]
         [Template(TemplateUsage.NoPreference, "Skip")]
         public int? Age { get; set; }
@@ -54,29 +55,6 @@ namespace LuisBot.Models
             return new FormBuilder<UserDetail>()
                 .Message("Okay, lets see if you're being paid well...")
                 .Message("I just need the answer to a few simple questions.")
-                .Field(nameof(Name))
-                .Field(nameof(Email),
-                validate: async (state, response) =>
-                {
-                    var result = new ValidateResult { IsValid = true, Value = response };
-                    var email = (response as string).Trim();
-                    Regex regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
-                    Match match = regex.Match(email);
-                    if (!match.Success)
-                    {
-                        result.Feedback = "Email is incorrect";
-                        result.IsValid = false;
-                    }
-                    return result;
-                }
-                )
-                .Field(nameof(PhoneNumber))
-                .Field(nameof(JobTitle))
-                .Field(nameof(Location))
-                .Field(nameof(Salary))
-                .Field(nameof(YearsOfXp))
-                .Field(nameof(Age))
-                .Field(nameof(Gender))
                 //.OnCompletion(processOrder)
                 .Build();
         }
