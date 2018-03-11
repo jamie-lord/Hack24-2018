@@ -64,19 +64,13 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("Greeting")]
         public async Task GreetingIntent(IDialogContext context, LuisResult result)
         {
-            await context.PostAsync("Hi I'm PorgBot!");
-
             var resultMessage = context.MakeMessage();
 
             string image = await GetGif("porg");
 
             if (!string.IsNullOrWhiteSpace(image))
             {
-                resultMessage.Attachments.Add(new Attachment()
-                {
-                    ContentUrl = image,
-                    ContentType = "image/png"
-                });
+                resultMessage.Attachments.Add(new AnimationCard(media: new List<MediaUrl> { new MediaUrl(image) }, title: "Hi I'm PorgBot!").ToAttachment());
             }
 
             await context.PostAsync(resultMessage);
@@ -134,11 +128,7 @@ namespace Microsoft.Bot.Sample.LuisBot
             }
             else
             {
-                resultMessage.Attachments.Add(new Attachment()
-                {
-                    ContentUrl = image,
-                    ContentType = "image/png"
-                });
+                resultMessage.Attachments.Add(new AnimationCard { Media = new List<MediaUrl> { new MediaUrl(image) }, Title = "Looks like a " + query + " to me" }.ToAttachment());
             }
 
             await context.PostAsync(resultMessage);
