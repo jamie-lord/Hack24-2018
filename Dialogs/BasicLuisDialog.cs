@@ -271,6 +271,12 @@ namespace Microsoft.Bot.Sample.LuisBot
             try
             {
                 var gameQuery = await result;
+                await context.PostAsync("Thanks for playing!");
+                LuisResult luisResult = new LuisResult("Congratulations!", new List<EntityRecommendation>()
+                {
+                    new EntityRecommendation { Entity = "Congratulations!" }
+                });
+                await ImageIntent(context, luisResult);
             }
             catch (FormCanceledException e)
             {
@@ -332,6 +338,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                     {
                         await context.PostAsync($"Hmmmm... Time to ask your boss about a pay increase. You earn less than the going rate in your area.");
                         await context.PostAsync($"The average salary for a {salaryQuery.JobTitle} is £{string.Format("{0:0.00}", averageSalary)}");
+                        await context.PostAsync("So your salary is a bit lower than other people in your area. Don't worry! Want to take a break? Type 'Let's Play' for a game :)");
                     }
                 }
                 else
