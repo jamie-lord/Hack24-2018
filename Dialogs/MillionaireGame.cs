@@ -12,23 +12,23 @@ namespace Microsoft.Bot.Sample.LuisBot
     {
         public enum QuestionOneEnum
         {
-            Transaction, Total, Tax, Trauma
+            Transaction=1, Total, Tax, Trauma
         }
 
         public enum QuestionTwoEnum
         {
-            Demonstrator, Instigator, Investigator, Terminator
+            Demonstrator=1, Instigator, Investigator, Terminator
         }
 
         public enum QuestionThreeEnum
         {
-            Tables, Gables, Cables, Stables
+            Tables=1, Gables, Cables, Stables
         }
 
         public enum QuestionFourEnum
         {
             [Describe("Elbow room")]
-            Elbow,
+            Elbow=1,
             [Describe("Foot rest")]
             FootRest,
             [Describe("Ear Hole")]
@@ -39,7 +39,7 @@ namespace Microsoft.Bot.Sample.LuisBot
 
         public enum QuestionFiveEnum
         {
-            Pan, Pin, Pen, Pun
+            Pan=1, Pin, Pen, Pun
         }
 
         [Prompt("Question 1: In the UK, VAT stands for value-added ...? {||}")]
@@ -63,7 +63,7 @@ namespace Microsoft.Bot.Sample.LuisBot
             IForm<MillionaireGame> formGame = new FormBuilder<MillionaireGame>()
                 .Message("Let's play, \"Who wants to be a millionaire?\"")
                 .Message("Oh the irony...")
-                .Field(nameof(QuestionOne), validate: (state, response) =>
+                .Field(nameof(QuestionOne), validate: async (state, response) =>
                 {
                     QuestionOneEnum choice = (QuestionOneEnum)response;
 
@@ -71,6 +71,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                     {
                         IsValid = choice == QuestionOneEnum.Tax,
                         Feedback = choice == QuestionOneEnum.Tax ? "That's the correct answer!" : "That's incorrect I'm afraid..",
+                        Value = response
                     };
 
                     if (!result.IsValid)
@@ -78,9 +79,9 @@ namespace Microsoft.Bot.Sample.LuisBot
                         throw new FormCanceledException("1", null);
                     }
 
-                    return Task.FromResult(result);
+                    return result;
                 })
-                .Field(nameof(QuestionTwo), validate: (state, response) =>
+                .Field(nameof(QuestionTwo), validate: async (state, response) =>
                 {
                     QuestionTwoEnum choice = (QuestionTwoEnum)response;
 
@@ -88,6 +89,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                     {
                         IsValid = choice == QuestionTwoEnum.Terminator,
                         Feedback = choice == QuestionTwoEnum.Terminator ? "You are doing well!" : "That's incorrect I'm afraid..",
+                        Value = response
                     };
 
                     if (!result.IsValid)
@@ -95,9 +97,9 @@ namespace Microsoft.Bot.Sample.LuisBot
                         throw new FormCanceledException("2", null);
                     }
 
-                    return Task.FromResult(result);
+                    return result;
                 })
-                .Field(nameof(QuestionThree), validate: (state, response) =>
+                .Field(nameof(QuestionThree), validate: async (state, response) =>
                 {
                     QuestionThreeEnum choice = (QuestionThreeEnum)response;
 
@@ -105,6 +107,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                     {
                         IsValid = choice == QuestionThreeEnum.Cables,
                         Feedback = choice == QuestionThreeEnum.Cables ? "Well that answer was obvious. Congratulations!" : "That's incorrect I'm afraid..",
+                        Value = response
                     };
 
                     if (!result.IsValid)
@@ -112,9 +115,9 @@ namespace Microsoft.Bot.Sample.LuisBot
                         throw new FormCanceledException("3", null);
                     }
 
-                    return Task.FromResult(result);
+                    return result;
                 })
-                .Field(nameof(QuestionFour), validate: (state, response) =>
+                .Field(nameof(QuestionFour), validate: async (state, response) =>
                 {
                     QuestionFourEnum choice = (QuestionFourEnum)response;
 
@@ -122,6 +125,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                     {
                         IsValid = choice == QuestionFourEnum.Elbow,
                         Feedback = choice == QuestionFourEnum.Elbow ? "We have a genius here! That's correct!" : "That's incorrect I'm afraid..",
+                        Value = response
                     };
 
                     if (!result.IsValid)
@@ -129,9 +133,9 @@ namespace Microsoft.Bot.Sample.LuisBot
                         throw new FormCanceledException("4", null);
                     }
 
-                    return Task.FromResult(result);
+                    return result;
                 })
-                .Field(nameof(QuestionFive), validate: (state, response) =>
+                .Field(nameof(QuestionFive), validate: async (state, response) =>
                 {
                     QuestionFiveEnum choice = (QuestionFiveEnum)response;
 
@@ -139,6 +143,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                     {
                         IsValid = choice == QuestionFiveEnum.Pun,
                         Feedback = choice == QuestionFiveEnum.Pun ? "Well this has been pun. You've done really well!" : "That's incorrect I'm afraid..",
+                        Value = response
                     };
 
                     if (!result.IsValid)
@@ -146,8 +151,9 @@ namespace Microsoft.Bot.Sample.LuisBot
                         throw new FormCanceledException("5", null);
                     }
 
-                    return Task.FromResult(result);
+                    return result;
                 })
+                .AddRemainingFields()
                 .Build();
 
             return formGame;
