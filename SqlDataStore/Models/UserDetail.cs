@@ -19,20 +19,20 @@ namespace LuisBot.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid Id { get; set; }
 
-        [Prompt("What is your {&}?")]
+        [Prompt("What's your first name?")]
         public string Name { get; set; }
-        [Prompt("What is your email?")]
+        [Prompt("Now I need your email address?")]
         public string Email { get; set; }
         [Prompt("What is your phone number?")]
         public double PhoneNumber { get; set; }
         [Prompt("What's your job title?")]
         public string JobTitle { get; set; }
-        [Prompt("Where do you work?")]
+        [Prompt("Where is your work place?")]
         public string Location { get; set; }
-        [Prompt("What is your {&}? (£)")]
+        [Prompt("How much do you earn?")]
         public double Salary { get; set; }
         [Optional]
-        [Prompt("How many years of experience do you have?")]
+        [Prompt("How long have you worked there?")]
         [Describe("Years of Experience")]
         [Template(TemplateUsage.NoPreference, "Skip")]
         public int? YearsOfXp { get; set; }
@@ -41,7 +41,7 @@ namespace LuisBot.Models
         [Describe("Age")]
         [Template(TemplateUsage.NoPreference, "Skip")]
         public int? Age { get; set; }
-        [Prompt("What is your {&}? {||}")]
+        [Prompt("How would you identify yourself? {||}")]
         public GenderOptions? Gender { get; set; }
 
         public static IForm<UserDetail> BuildForm()
@@ -51,7 +51,9 @@ namespace LuisBot.Models
             //    await context.PostAsync("Your PorgPowered Salary bot Has Been Successfully Completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
             //};
 
-            return new FormBuilder<UserDetail>().Message("Hi! Welcome to PorgPowered salary bot")
+            return new FormBuilder<UserDetail>()
+                .Message("Okay, lets see if you're being paid well...")
+                .Message("I just need the answer to a few simple questions.")
                 .Field(nameof(Name))
                 .Field(nameof(Email),
                 validate: async (state, response) =>

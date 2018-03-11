@@ -47,7 +47,37 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("Greeting")]
         public async Task GreetingIntent(IDialogContext context, LuisResult result)
         {
-            await this.ShowLuisResult(context, result);
+            await context.PostAsync("Hi I'm PorgBot!");
+
+            var resultMessage = context.MakeMessage();
+
+            string image = null;
+            try
+            {
+                var giphy = new Giphy("oZy0HYzaXNCmrq0dNOGyiuZgyaaTc3hL");
+                var searchParameter = new SearchParameter()
+                {
+                    Query = "porg"
+                };
+                // Returns gif results
+                var gifResult = await giphy.GifSearch(searchParameter);
+                image = gifResult.Data?[new Random().Next(0, gifResult.Data.Length + 1)]?.Images.Original.Url;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            if (!string.IsNullOrWhiteSpace(image))
+            {
+                resultMessage.Attachments.Add(new Attachment()
+                {
+                    ContentUrl = image,
+                    ContentType = "image/png"
+                });
+            }
+
+            await context.PostAsync(resultMessage);
         }
 
         [LuisIntent("Cancel")]
@@ -80,7 +110,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                     };
                     // Returns gif results
                     var gifResult = await giphy.GifSearch(searchParameter);
-                    image = gifResult.Data.FirstOrDefault()?.Images.Original.Url;
+                    image = gifResult.Data?[new Random().Next(0, gifResult.Data.Length + 1)]?.Images.Original.Url;
                 }
                 catch (Exception e)
                 {
@@ -147,13 +177,13 @@ namespace Microsoft.Bot.Sample.LuisBot
                     if (salaryQuery.Salary > averageSalary)
                     {
                         await context.PostAsync($"Wow, you earn above the average in your area for people with your job!");
-                        await context.PostAsync($"The average salary is only £{averageSalary}");
-                        await context.PostAsync($"That means you earn £{salaryQuery.Salary - averageSalary} more than the average {salaryQuery.JobTitle} in your area.");
+                        await context.PostAsync($"The average salary is only £{string.Format("{0:0.00}", averageSalary)}");
+                        await context.PostAsync($"That means you earn £{string.Format("{0:0.00}", (salaryQuery.Salary - averageSalary))} more than the average {salaryQuery.JobTitle} in your area.");
                     }
                     else
                     {
                         await context.PostAsync($"Hmmmm... Time to ask your boss about a pay increase. You earn less than the going rate in your area.");
-                        await context.PostAsync($"The average salary for a {salaryQuery.JobTitle} is £{averageSalary}");
+                        await context.PostAsync($"The average salary for a {salaryQuery.JobTitle} is £{string.Format("{0:0.00}", averageSalary)}");
                     }
                 }
                 else
