@@ -44,7 +44,7 @@ namespace Microsoft.Bot.Sample.LuisBot
 
             if (!string.IsNullOrWhiteSpace(image))
             {
-                resultMessage.Attachments.Add(new AnimationCard(subtitle: noComprendeSB.ToString(), media: new List<MediaUrl> { new MediaUrl(image) }).ToAttachment());
+                resultMessage.Attachments.Add(new AnimationCard(title: "Ooops", subtitle: noComprendeSB.ToString(), media: new List<MediaUrl> { new MediaUrl(image) }).ToAttachment());
             }
             else
             {
