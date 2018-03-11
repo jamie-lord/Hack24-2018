@@ -1,5 +1,8 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -119,16 +122,53 @@ namespace Microsoft.Bot.Sample.LuisBot
             try
             {
                 var salaryQuery = await result;
+                List<UserDetail> similarJobs = null;
 
                 using (SqlDataStore.DataContext dataContext = new SqlDataStore.DataContext())
                 {
+                    salaryQuery.JobTitle = salaryQuery.JobTitle.ToLower();
                     dataContext.UserDetails.Add(salaryQuery);
                     dataContext.SaveChanges();
+
+                    var q = from userDetail in dataContext.UserDetails
+                            where userDetail.JobTitle.ToLower().Contains(salaryQuery.JobTitle.ToLower()) &&
+                                  userDetail.Location.ToLower().Contains(salaryQuery.Location.ToLower())
+                            select userDetail;
+
+                    similarJobs = q.ToList();
                 }
 
-                await context.PostAsync("Your PorgPowered survey has been successfully completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
+                if (similarJobs != null && similarJobs.Count() > 0)
+                {
+                    await context.PostAsync("Nice! Looks like we've found some people in your area that do the same thing as you.");
+
+                    double averageSalary = 0;
+                    foreach (var similarJob in similarJobs)
+                    {
+                        averageSalary = averageSalary + similarJob.Salary;
+                    }
+
+                    averageSalary = averageSalary / similarJobs.Count();
+
+                    if (salaryQuery.Salary > averageSalary)
+                    {
+                        await context.PostAsync($"Wow, you earn above the average in your area for people with your job!");
+                        await context.PostAsync($"The average salary is only {string.Format(new CultureInfo("en-GB"), "{0:C}", averageSalary)}");
+                        await context.PostAsync($"That means you earn {string.Format(new CultureInfo("en-GB"), "{0:C}", salaryQuery.Salary - averageSalary)} more than the average {salaryQuery.JobTitle} in your area.");
+                    }
+                    else
+                    {
+                        await context.PostAsync($"Hmmmm... Time to ask your boss about a pay increase. You earn less than the going rate in your area.");
+                        await context.PostAsync($"The average salary is {string.Format(new CultureInfo("en-GB"), "{0:C}", averageSalary.ToString("C0"))}");
+                    }
+                }
+                else
+                {
+                    await context.PostAsync(
+                        "Your PorgPowered survey has been successfully completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
+                }
             }
-            catch(FormCanceledException ex)
+            catch (FormCanceledException ex)
             {
                 string reply;
                 if (ex.InnerException == null)
