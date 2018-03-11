@@ -203,24 +203,34 @@ namespace Microsoft.Bot.Sample.LuisBot
             {
                 Body = new List<AdaptiveElement>
                 {
-                    new AdaptiveTextBlock(creditCard.Name) {Size = AdaptiveTextSize.Large, Color = AdaptiveTextColor.Dark, Weight = AdaptiveTextWeight.Bolder},
-                    new AdaptiveImage(creditCard.ImageUrl) {Size = AdaptiveImageSize.Large, Spacing = AdaptiveSpacing.Padding},
-                    new AdaptiveTextBlock("Annual fee: **£" +  creditCard.AnnualFee.ToString() + "**"),
-                    new AdaptiveColumnSet() {Columns = new List<AdaptiveColumn>
+                    new AdaptiveContainer()
                     {
-                        new AdaptiveColumn() {Items = new List<AdaptiveElement>
+                        SelectAction = new AdaptiveOpenUrlAction()
                         {
-                            new AdaptiveTextBlock("Purchase APR: **" + creditCard.PurchaseApr.ToString() + "%**")
-                        }},
-                        new AdaptiveColumn()
+                            Url = new Uri(creditCard.Link)
+                        },
+                        Items = new List<AdaptiveElement>
                         {
-                            Items = new List<AdaptiveElement>
+                            new AdaptiveTextBlock(creditCard.Name) {Size = AdaptiveTextSize.Large, Color = AdaptiveTextColor.Dark, Weight = AdaptiveTextWeight.Bolder},
+                            new AdaptiveImage(creditCard.ImageUrl) {Size = AdaptiveImageSize.Large, Spacing = AdaptiveSpacing.Padding},
+                            new AdaptiveTextBlock("Annual fee: **£" +  creditCard.AnnualFee.ToString() + "**"),
+                            new AdaptiveColumnSet() {Columns = new List<AdaptiveColumn>
                             {
-                                new AdaptiveImage("https://images.experian.co.uk/rebrand//experian_full_colour.svg") {Size = AdaptiveImageSize.Medium, Spacing = AdaptiveSpacing.Padding, HorizontalAlignment = AdaptiveHorizontalAlignment.Right}
-                            },
+                                new AdaptiveColumn() {Items = new List<AdaptiveElement>
+                                {
+                                    new AdaptiveTextBlock("Purchase APR: **" + creditCard.PurchaseApr.ToString() + "%**")
+                                }},
+                                new AdaptiveColumn()
+                                {
+                                    Items = new List<AdaptiveElement>
+                                    {
+                                        new AdaptiveImage("https://images.experian.co.uk/rebrand//experian_full_colour.svg") {Size = AdaptiveImageSize.Medium, Spacing = AdaptiveSpacing.Padding, HorizontalAlignment = AdaptiveHorizontalAlignment.Right}
+                                    },
 
+                                }
+                            }}
                         }
-                    }}
+                    }
                 },
                 Actions = new List<AdaptiveAction>
                 {
