@@ -153,13 +153,13 @@ namespace Microsoft.Bot.Sample.LuisBot
                     if (salaryQuery.Salary > averageSalary)
                     {
                         await context.PostAsync($"Wow, you earn above the average in your area for people with your job!");
-                        await context.PostAsync($"The average salary is only {string.Format(new CultureInfo("en-GB"), "{0:C}", averageSalary)}");
-                        await context.PostAsync($"That means you earn {string.Format(new CultureInfo("en-GB"), "{0:C}", salaryQuery.Salary - averageSalary)} more than the average {salaryQuery.JobTitle} in your area.");
+                        await context.PostAsync($"The average salary is only £{averageSalary}");
+                        await context.PostAsync($"That means you earn £{salaryQuery.Salary - averageSalary} more than the average {salaryQuery.JobTitle} in your area.");
                     }
                     else
                     {
                         await context.PostAsync($"Hmmmm... Time to ask your boss about a pay increase. You earn less than the going rate in your area.");
-                        await context.PostAsync($"The average salary is {string.Format(new CultureInfo("en-GB"), "{0:C}", averageSalary.ToString("C0"))}");
+                        await context.PostAsync($"The average salary for a {salaryQuery.JobTitle} is £{averageSalary}");
                     }
                 }
                 else
