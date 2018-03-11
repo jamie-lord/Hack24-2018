@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text;
@@ -46,7 +47,7 @@ namespace Microsoft.Bot.Sample.LuisBot
         public async Task GreetingIntent(IDialogContext context, LuisResult result)
         {
             if (!ShouldBotReply(context)) return;
-            await this.ShowLuisResult(context, result);
+            await context.PostAsync("Hello! How can I help?");
         }
 
         [LuisIntent("Cancel")]
@@ -69,6 +70,7 @@ namespace Microsoft.Bot.Sample.LuisBot
             if (!ShouldBotReply(context)) return;
             var resultMessage = context.MakeMessage();
 
+            string lowResImage = null;
             string image = null;
             var query = result.Entities.FirstOrDefault()?.Entity;
             if (!string.IsNullOrWhiteSpace(query))
@@ -82,7 +84,10 @@ namespace Microsoft.Bot.Sample.LuisBot
                     };
                     // Returns gif results
                     var gifResult = await giphy.GifSearch(searchParameter);
-                    image = gifResult.Data.FirstOrDefault()?.Images.Original.Url;
+                    Random rand = new Random();
+                    int resultIdx = rand.Next(gifResult.Data.Length - 1);
+                    image = gifResult.Data[resultIdx].Images.Original.Url;
+                    lowResImage = gifResult.Data[resultIdx].Images.DownsizedStill?.Url ?? image;
                 }
                 catch (Exception e)
                 {
@@ -96,11 +101,19 @@ namespace Microsoft.Bot.Sample.LuisBot
             }
             else
             {
-                resultMessage.Attachments.Add(new Attachment()
+                resultMessage.Attachments.Add(new AnimationCard()
                 {
-                    ContentUrl = image,
-                    ContentType = "image/png"
-                });
+                    Title = query,
+                    Subtitle = "Powered by Giphy",
+                    Image = new ThumbnailUrl { Url = lowResImage },
+                    Media = new List<MediaUrl>
+                    {
+                        new MediaUrl()
+                        {
+                            Url = image
+                        }
+                    }
+                }.ToAttachment());
             }
 
             await context.PostAsync(resultMessage);
@@ -159,8 +172,21 @@ namespace Microsoft.Bot.Sample.LuisBot
             Activity ac = context.Activity as Activity;
             bool willReply = context.Activity.Conversation.IsGroup == true && (ac?.MentionsRecipient() == true);
             willReply = willReply || context.Activity.Conversation.IsGroup == null || context.Activity.Conversation.IsGroup == false;
-            ac?.RemoveMentionText(ac?.Recipient?.Id);
-            return willReply;
+
+            var mentions = ac.GetMentions();
+            string messageText = ac.Text;
+            for (int i = 0; i < mentions.Length; i++)
+            {
+                if (mentions[i].Mentioned.Id == ac.Recipient.Id)
+                {
+                    //Bot is in the @mention list.  
+                    //The below example will strip the bot name out of the message, so you can parse it as if it wasn't included.  Note that the Text object will contain the full bot name, if applicable.
+                    if (mentions[i].Text != null)
+                        messageText = messageText.Replace(mentions[i].Text, "");
+                }
+            }
+
+            return true;
         }
     }
 }
