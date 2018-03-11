@@ -19,6 +19,7 @@ namespace LuisBot.Models
         [Prompt("What is your {&}?")]
         public string Name { get; set; }
         [Prompt("What is your email?")]
+        [Pattern(@"^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$")]
         public string Email { get; set; }
         [Prompt("What is your phone number?")]
         public double PhoneNumber { get; set; }
@@ -49,29 +50,6 @@ namespace LuisBot.Models
             //};
 
             return new FormBuilder<UserDetail>().Message("Hi! Welcome to PorgPowered salary bot")
-                .Field(nameof(Name))
-                .Field(nameof(Email),
-                validate: async (state, response) =>
-                {
-                    var result = new ValidateResult { IsValid = true, Value = response };
-                    var email = (response as string).Trim();
-                    Regex regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
-                    Match match = regex.Match(email);
-                    if (!match.Success)
-                    {
-                        result.Feedback = "Email is incorrect";
-                        result.IsValid = false;
-                    }
-                    return result;
-                }
-                )
-                .Field(nameof(PhoneNumber))
-                .Field(nameof(JobTitle))
-                .Field(nameof(Location))
-                .Field(nameof(Salary))
-                .Field(nameof(YearsOfXp))
-                .Field(nameof(Age))
-                .Field(nameof(Gender))
                 //.OnCompletion(processOrder)
                 .Build();
         }
