@@ -95,15 +95,36 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("StartSalaryQuery")]
         public async Task StartSalaryQueryIntent(IDialogContext context, LuisResult result)
         {
-            await context.PostAsync("Please wait while we load the Salary Calculator...");
-
-            var formDialog = new FormDialog<UserDetail>(new UserDetail(), UserDetail.BuildForm);
+            var formDialog = new FormDialog<UserDetail>(new UserDetail(), UserDetail.BuildForm, FormOptions.PromptInStart, result.Entities);
             context.Call(formDialog, ResumeAfterSalaryQueryDialog);
         }
 
         private async Task ResumeAfterSalaryQueryDialog(IDialogContext context, IAwaitable<UserDetail> result)
         {
-            await context.PostAsync("Thanks, I'll just work out how well you get paid...");
+            try
+            {
+                var salaryQuery = await result;
+
+                await context.PostAsync("Your PorgPowered survey has been successfully completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
+            }
+            catch(FormCanceledException ex)
+            {
+                string reply;
+                if (ex.InnerException == null)
+                {
+                    reply = "It looks like you have quit the survey. Rerun this at any time by simply typing \"Start Salary Calculator\"";
+                }
+                else
+                {
+                    reply = $"Oops! Something went wrong :( Technical Details: {ex.InnerException.Message}";
+                }
+
+                await context.PostAsync(reply);
+            }
+            finally
+            {
+                context.Done<object>(null);
+            }
         }
 
         private async Task ShowLuisResult(IDialogContext context, LuisResult result)
