@@ -167,7 +167,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                 }
             }
 
-            return willReply;
+            return true;
         }
     }
 }
