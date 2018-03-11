@@ -6,6 +6,10 @@ using Microsoft.Bot.Builder.Azure;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
 using LuisBot;
+#if DEBUG
+#else
+using Microsoft.Bot.Builder.Dialogs.Internals;
+#endif
 
 namespace SimpleEchoBot
 {
@@ -43,7 +47,7 @@ namespace SimpleEchoBot
                     // var store = new DocumentDbBotDataStore("cosmos db uri", "cosmos db key"); // requires Microsoft.BotBuilder.Azure Nuget package 
                     // var store = new InMemoryDataStore(); // volatile in-memory store
 
-                    builder.Register(c => store)
+                    containerBuilder.Register(c => store)
                         .Keyed<IBotDataStore<BotData>>(AzureModule.Key_DataStore)
                         .AsSelf()
                         .SingleInstance();
