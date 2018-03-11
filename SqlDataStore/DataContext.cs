@@ -13,5 +13,7 @@ namespace SqlDataStore
         public DbSet<Activity> Activities { get; set; }
 
         public DbSet<UserDetail> UserDetails { get; set; }
+
+        public DbSet<CreditCard> CreditCards { get; set; }
     }
 }

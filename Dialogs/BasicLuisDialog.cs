@@ -6,6 +6,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using AdaptiveCards;
 using GiphyDotNet.Manager;
 using GiphyDotNet.Model.Parameters;
 using LuisBot.Models;
@@ -14,6 +16,7 @@ using Microsoft.Bot.Builder.FormFlow;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
+using SqlDataStore.Models;
 
 namespace Microsoft.Bot.Sample.LuisBot
 {
@@ -151,6 +154,86 @@ namespace Microsoft.Bot.Sample.LuisBot
             await context.PostAsync(resultMessage);
         }
 
+        [LuisIntent("Credit Card")]
+        public async Task CreditCardIntent(IDialogContext context, LuisResult result)
+        {
+            try
+            {
+                List<CreditCard> creditCards = null;
+
+                using (SqlDataStore.DataContext dataContext = new SqlDataStore.DataContext())
+                {
+                    var q = from creditCard in dataContext.CreditCards
+                            select creditCard;
+
+                    creditCards = q.ToList();
+                }
+
+                if (creditCards != null && creditCards.Count > 0)
+                {
+                    await context.PostAsync($"We've found {creditCards.Count} credit cards that might interest you...");
+
+                    var resultMessage = context.MakeMessage();
+                    resultMessage.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+
+                    foreach (var creditCard in creditCards)
+                    {
+                        var adaptiveCard = CreditCardFactory(creditCard);
+                        Attachment attachment = new Attachment()
+                        {
+                            ContentType = AdaptiveCard.ContentType,
+                            Content = adaptiveCard
+                        };
+                        resultMessage.Attachments.Add(attachment);
+                    }
+
+                    await context.PostAsync(resultMessage);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                await context.PostAsync("I'm having some trouble getting credit card details at the moment, maybe try again in a minute or two.");
+            }
+        }
+
+        private AdaptiveCard CreditCardFactory(CreditCard creditCard)
+        {
+            AdaptiveCard card = new AdaptiveCard()
+            {
+                Body = new List<AdaptiveElement>
+                {
+                    new AdaptiveTextBlock(creditCard.Name) {Size = AdaptiveTextSize.Large, Color = AdaptiveTextColor.Dark, Weight = AdaptiveTextWeight.Bolder},
+                    new AdaptiveImage(creditCard.ImageUrl) {Size = AdaptiveImageSize.Large, Spacing = AdaptiveSpacing.Padding},
+                    new AdaptiveTextBlock("Annual fee: £" +  creditCard.AnnualFee.ToString()),
+                    new AdaptiveColumnSet() {Columns = new List<AdaptiveColumn>
+                    {
+                        new AdaptiveColumn() {Items = new List<AdaptiveElement>
+                        {
+                            new AdaptiveTextBlock("Purchase APR: " + creditCard.PurchaseApr.ToString() + "%")
+                        }},
+                        new AdaptiveColumn()
+                        {
+                            Items = new List<AdaptiveElement>
+                            {
+                                new AdaptiveImage("https://images.experian.co.uk/rebrand//experian_full_colour.svg") {Size = AdaptiveImageSize.Medium, Spacing = AdaptiveSpacing.Padding, HorizontalAlignment = AdaptiveHorizontalAlignment.Right}
+                            },
+
+                        }
+                    }}
+                },
+                Actions = new List<AdaptiveAction>
+                {
+                    new AdaptiveOpenUrlAction()
+                    {
+                        Url = new Uri(creditCard.Link),
+                        Title = "See more details"
+                    }
+                }
+            };
+            return card;
+        }
+
         [LuisIntent("StartSalaryQuery")]
         public async Task StartSalaryQueryIntent(IDialogContext context, LuisResult result)
         {
@@ -158,6 +241,50 @@ namespace Microsoft.Bot.Sample.LuisBot
             context.Call(formDialog, ResumeAfterSalaryQueryDialog);
         }
 
+        [LuisIntent("PlayAGame")]
+        public async Task StartPlayAGameIntent(IDialogContext context, LuisResult result)
+        {
+            await context.PostAsync("Okay, let's play a gaaaaameeeeeeeee");
+
+            LuisResult luisResult = new LuisResult("Saw play a game", new List<EntityRecommendation>()
+            {
+                new EntityRecommendation { Entity = "Saw play a game" }
+            });
+            await ImageIntent(context, luisResult);
+
+            var formDialog = new FormDialog<MillionaireGame>(new MillionaireGame(), MillionaireGame.BuildForm, FormOptions.PromptInStart, result.Entities);
+            context.Call(formDialog, ResumeAfterGameDialog);
+        }
+
+        private async Task ResumeAfterGameDialog(IDialogContext context, IAwaitable<MillionaireGame> result)
+        {
+            try
+            {
+                var gameQuery = await result;
+                await context.PostAsync("Thanks for playing!");
+                LuisResult luisResult = new LuisResult("Congratulations!", new List<EntityRecommendation>()
+                {
+                    new EntityRecommendation { Entity = "Congratulations!" }
+                });
+                await ImageIntent(context, luisResult);
+            }
+            catch (FormCanceledException e)
+            {
+                int questionStep = -1;
+                if (e.Message.ToLowerInvariant().Equals("form quit."))
+                {
+                    await context.PostAsync("You quit? Really? Shame on you!");
+                }
+                else if (Int32.TryParse(e.Message, out questionStep))
+                {
+                    await context.PostAsync($"Oh dear oh dear. You couldn't get past question {questionStep}!");
+                }
+            }
+            finally
+            {
+                context.Done<object>(null);
+            }
+        }
         private async Task ResumeAfterSalaryQueryDialog(IDialogContext context, IAwaitable<UserDetail> result)
         {
             try
