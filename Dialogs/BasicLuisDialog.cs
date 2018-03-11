@@ -49,7 +49,37 @@ namespace Microsoft.Bot.Sample.LuisBot
         public async Task GreetingIntent(IDialogContext context, LuisResult result)
         {
             if (!ShouldBotReply(context)) return;
-            await this.ShowLuisResult(context, result);
+            await context.PostAsync("Hi I'm PorgBot!");
+
+            var resultMessage = context.MakeMessage();
+
+            string image = null;
+            try
+            {
+                var giphy = new Giphy("oZy0HYzaXNCmrq0dNOGyiuZgyaaTc3hL");
+                var searchParameter = new SearchParameter()
+                {
+                    Query = "porg"
+                };
+                // Returns gif results
+                var gifResult = await giphy.GifSearch(searchParameter);
+                image = gifResult.Data?[new Random().Next(0, gifResult.Data.Length + 1)]?.Images.Original.Url;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            if (!string.IsNullOrWhiteSpace(image))
+            {
+                resultMessage.Attachments.Add(new Attachment()
+                {
+                    ContentUrl = image,
+                    ContentType = "image/png"
+                });
+            }
+
+            await context.PostAsync(resultMessage);
         }
 
         [LuisIntent("Cancel")]
@@ -85,7 +115,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                     };
                     // Returns gif results
                     var gifResult = await giphy.GifSearch(searchParameter);
-                    image = gifResult.Data.FirstOrDefault()?.Images.Original.Url;
+                    image = gifResult.Data?[new Random().Next(0, gifResult.Data.Length + 1)]?.Images.Original.Url;
                 }
                 catch (Exception e)
                 {
