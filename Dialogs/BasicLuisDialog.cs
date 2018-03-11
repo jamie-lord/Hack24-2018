@@ -171,6 +171,8 @@ namespace Microsoft.Bot.Sample.LuisBot
 
                 if (creditCards != null && creditCards.Count > 0)
                 {
+                    await context.PostAsync($"We've found {creditCards.Count} credit cards that might interest you...");
+
                     var resultMessage = context.MakeMessage();
                     resultMessage.AttachmentLayout = AttachmentLayoutTypes.Carousel;
 
@@ -203,12 +205,12 @@ namespace Microsoft.Bot.Sample.LuisBot
                 {
                     new AdaptiveTextBlock(creditCard.Name) {Size = AdaptiveTextSize.Large, Color = AdaptiveTextColor.Dark, Weight = AdaptiveTextWeight.Bolder},
                     new AdaptiveImage(creditCard.ImageUrl) {Size = AdaptiveImageSize.Large, Spacing = AdaptiveSpacing.Padding},
-                    new AdaptiveTextBlock("Annual fee: £" +  creditCard.AnnualFee.ToString()),
+                    new AdaptiveTextBlock("Annual fee: **£" +  creditCard.AnnualFee.ToString() + "**"),
                     new AdaptiveColumnSet() {Columns = new List<AdaptiveColumn>
                     {
                         new AdaptiveColumn() {Items = new List<AdaptiveElement>
                         {
-                            new AdaptiveTextBlock("Purchase APR: " + creditCard.PurchaseApr.ToString() + "%")
+                            new AdaptiveTextBlock("Purchase APR: **" + creditCard.PurchaseApr.ToString() + "%**")
                         }},
                         new AdaptiveColumn()
                         {
