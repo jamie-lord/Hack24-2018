@@ -36,24 +36,23 @@ namespace Microsoft.Bot.Sample.LuisBot
 
             string image = await GetGif("say what");
 
-            if (!string.IsNullOrWhiteSpace(image))
-            {
-                resultMessage.Attachments.Add(new Attachment()
-                {
-                    ContentUrl = image,
-                    ContentType = "image/png"
-                });
-            }
-
-            await context.PostAsync(resultMessage);
-
             StringBuilder noComprendeSB = new StringBuilder("Sorry, I didn't understand");
             if (!string.IsNullOrWhiteSpace(result?.Query))
             {
                 noComprendeSB.Append($" what you meant when you said \"{result.Query}\"");
             }
 
-            await context.PostAsync(noComprendeSB.ToString());
+            if (!string.IsNullOrWhiteSpace(image))
+            {
+                resultMessage.Attachments.Add(new AnimationCard(subtitle: noComprendeSB.ToString(), media: new List<MediaUrl> { new MediaUrl(image) }).ToAttachment());
+            }
+            else
+            {
+                await context.PostAsync(noComprendeSB.ToString());
+            }
+
+            await context.PostAsync(resultMessage);
+
             await context.PostAsync("Please try a different term or phrase.");
         }
 
