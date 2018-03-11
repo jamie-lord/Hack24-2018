@@ -104,8 +104,17 @@
     <Compile Include="Migrations\201803110459088_Initial.Designer.cs">
       <DependentUpon>201803110459088_Initial.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201803110842093_credit-cards.cs" />
+    <Compile Include="Migrations\201803110842093_credit-cards.Designer.cs">
+      <DependentUpon>201803110842093_credit-cards.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201803110847141_credit-cards2.cs" />
+    <Compile Include="Migrations\201803110847141_credit-cards2.Designer.cs">
+      <DependentUpon>201803110847141_credit-cards2.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Activity.cs" />
+    <Compile Include="Models\CreditCard.cs" />
     <Compile Include="Models\UserDetail.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -116,6 +125,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201803110459088_Initial.resx">
       <DependentUpon>201803110459088_Initial.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201803110842093_credit-cards.resx">
+      <DependentUpon>201803110842093_credit-cards.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201803110847141_credit-cards2.resx">
+      <DependentUpon>201803110847141_credit-cards2.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

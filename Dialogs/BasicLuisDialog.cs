@@ -6,6 +6,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using AdaptiveCards;
 using GiphyDotNet.Manager;
 using GiphyDotNet.Model.Parameters;
 using LuisBot.Models;
@@ -14,6 +16,7 @@ using Microsoft.Bot.Builder.FormFlow;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
+using SqlDataStore.Models;
 
 namespace Microsoft.Bot.Sample.LuisBot
 {
@@ -149,6 +152,86 @@ namespace Microsoft.Bot.Sample.LuisBot
             resultMessage.Attachments.Add(new VideoCard(title: "LOOK AT MY HORSE!", autoloop: true, autostart: true, media: new List<MediaUrl> { new MediaUrl("https://www.youtube.com/watch?v=O3rpmctmC_M") }).ToAttachment());
 
             await context.PostAsync(resultMessage);
+        }
+
+        [LuisIntent("Credit Card")]
+        public async Task CreditCardIntent(IDialogContext context, LuisResult result)
+        {
+            try
+            {
+                List<CreditCard> creditCards = null;
+
+                using (SqlDataStore.DataContext dataContext = new SqlDataStore.DataContext())
+                {
+                    var q = from creditCard in dataContext.CreditCards
+                            select creditCard;
+
+                    creditCards = q.ToList();
+                }
+
+                if (creditCards != null && creditCards.Count > 0)
+                {
+                    await context.PostAsync($"We've found {creditCards.Count} credit cards that might interest you...");
+
+                    var resultMessage = context.MakeMessage();
+                    resultMessage.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+
+                    foreach (var creditCard in creditCards)
+                    {
+                        var adaptiveCard = CreditCardFactory(creditCard);
+                        Attachment attachment = new Attachment()
+                        {
+                            ContentType = AdaptiveCard.ContentType,
+                            Content = adaptiveCard
+                        };
+                        resultMessage.Attachments.Add(attachment);
+                    }
+
+                    await context.PostAsync(resultMessage);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                await context.PostAsync("I'm having some trouble getting credit card details at the moment, maybe try again in a minute or two.");
+            }
+        }
+
+        private AdaptiveCard CreditCardFactory(CreditCard creditCard)
+        {
+            AdaptiveCard card = new AdaptiveCard()
+            {
+                Body = new List<AdaptiveElement>
+                {
+                    new AdaptiveTextBlock(creditCard.Name) {Size = AdaptiveTextSize.Large, Color = AdaptiveTextColor.Dark, Weight = AdaptiveTextWeight.Bolder},
+                    new AdaptiveImage(creditCard.ImageUrl) {Size = AdaptiveImageSize.Large, Spacing = AdaptiveSpacing.Padding},
+                    new AdaptiveTextBlock("Annual fee: £" +  creditCard.AnnualFee.ToString()),
+                    new AdaptiveColumnSet() {Columns = new List<AdaptiveColumn>
+                    {
+                        new AdaptiveColumn() {Items = new List<AdaptiveElement>
+                        {
+                            new AdaptiveTextBlock("Purchase APR: " + creditCard.PurchaseApr.ToString() + "%")
+                        }},
+                        new AdaptiveColumn()
+                        {
+                            Items = new List<AdaptiveElement>
+                            {
+                                new AdaptiveImage("https://images.experian.co.uk/rebrand//experian_full_colour.svg") {Size = AdaptiveImageSize.Medium, Spacing = AdaptiveSpacing.Padding, HorizontalAlignment = AdaptiveHorizontalAlignment.Right}
+                            },
+
+                        }
+                    }}
+                },
+                Actions = new List<AdaptiveAction>
+                {
+                    new AdaptiveOpenUrlAction()
+                    {
+                        Url = new Uri(creditCard.Link),
+                        Title = "See more details"
+                    }
+                }
+            };
+            return card;
         }
 
         [LuisIntent("StartSalaryQuery")]
