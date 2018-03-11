@@ -21,7 +21,6 @@ namespace LuisBot.Models
 
         [Prompt("What's your first name?")]
         public string Name { get; set; }
-        [Pattern(@"^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$")]
         [Prompt("Great {Name:string}, now I need your email address?")]
         public string Email { get; set; }
         [Prompt("What is your phone number {Name:string}?")]
@@ -33,7 +32,7 @@ namespace LuisBot.Models
         [Prompt("How much do you earn being a {JobTitle:string}?")]
         public double Salary { get; set; }
         [Optional]
-        [Prompt("How long have you worked in {Location:string}?")]
+        [Prompt("How many years have you worked in {Location:string}?")]
         [Describe("Years of Experience")]
         [Template(TemplateUsage.NoPreference, "Skip")]
         public int? YearsOfXp { get; set; }
