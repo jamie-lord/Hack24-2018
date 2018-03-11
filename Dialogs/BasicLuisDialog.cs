@@ -153,10 +153,20 @@ namespace Microsoft.Bot.Sample.LuisBot
             Activity ac = context.Activity as Activity;
             bool willReply = context.Activity.Conversation.IsGroup == true && (ac?.MentionsRecipient() == true);
             willReply = willReply || context.Activity.Conversation.IsGroup == null || context.Activity.Conversation.IsGroup == false;
-            if (ac != null)
+
+            var mentions = ac.GetMentions();
+            string messageText = ac.Text;
+            for (int i = 0; i < mentions.Length; i++)
             {
-                ac.Text = ac.RemoveMentionText(ac.Recipient.Id);
+                if (mentions[i].Mentioned.Id == ac.Recipient.Id)
+                {
+                    //Bot is in the @mention list.  
+                    //The below example will strip the bot name out of the message, so you can parse it as if it wasn't included.  Note that the Text object will contain the full bot name, if applicable.
+                    if (mentions[i].Text != null)
+                        messageText = messageText.Replace(mentions[i].Text, "");
+                }
             }
+
             return willReply;
         }
     }
