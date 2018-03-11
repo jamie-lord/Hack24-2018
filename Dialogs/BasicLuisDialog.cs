@@ -158,6 +158,18 @@ namespace Microsoft.Bot.Sample.LuisBot
             context.Call(formDialog, ResumeAfterSalaryQueryDialog);
         }
 
+        [LuisIntent("PlayAGame")]
+        public async Task StartPlayAGameIntent(IDialogContext context, LuisResult result)
+        {
+            await context.PostAsync("Okay, let's play a gaaaaameeeeeeeee");
+
+            LuisResult luisResult = new LuisResult("Saw play a game", new List<EntityRecommendation>()
+            {
+                new EntityRecommendation { Entity = "Saw play a game" }
+            });
+            await ImageIntent(context, luisResult);
+        }
+
         private async Task ResumeAfterSalaryQueryDialog(IDialogContext context, IAwaitable<UserDetail> result)
         {
             try
