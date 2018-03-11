@@ -178,6 +178,12 @@ namespace Microsoft.Bot.Sample.LuisBot
             try
             {
                 var gameQuery = await result;
+                await context.PostAsync("Thanks for playing!");
+                LuisResult luisResult = new LuisResult("Congratulations!", new List<EntityRecommendation>()
+                {
+                    new EntityRecommendation { Entity = "Congratulations!" }
+                });
+                await ImageIntent(context, luisResult);
             }
             catch (FormCanceledException e)
             {
