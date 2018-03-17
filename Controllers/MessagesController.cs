@@ -38,7 +38,7 @@ namespace Microsoft.Bot.Sample.LuisBot
                     {
                         if (!string.IsNullOrWhiteSpace(mention.Text))
                         {
-                            message = message.Replace(mention.Text, string.Empty);
+                            message = message.Replace(mention.Text, string.Empty).Trim();
                             mentioned = true;
                         }
                     }
