@@ -31,7 +31,7 @@ namespace Microsoft.Bot.Sample.LuisBot
             {
                 var mentions = activity.GetMentions()?.ToList();
                 var message = activity.Text;
-
+                bool mentioned = false;
                 foreach (var mention in mentions)
                 {
                     if(mention.Mentioned.Id == activity.Recipient.Id)
@@ -39,13 +39,15 @@ namespace Microsoft.Bot.Sample.LuisBot
                         if (!string.IsNullOrWhiteSpace(mention.Text))
                         {
                             message = message.Replace(mention.Text, string.Empty);
+                            mentioned = true;
                         }
                     }
                 }
 
                 activity.Text = message;
 
-                await Conversation.SendAsync(activity, () => new BasicLuisDialog());
+                if (mentioned)
+                    await Conversation.SendAsync(activity, () => new BasicLuisDialog());
 
                 // The following is for FormFlow dialog.
                 // TODO: uncomment when we can
