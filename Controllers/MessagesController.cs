@@ -6,6 +6,7 @@ using System.Web.Http.Description;
 using System.Net.Http;
 using LuisBot.Models;
 using Microsoft.Bot.Builder.FormFlow;
+using System.Linq;
 
 namespace Microsoft.Bot.Sample.LuisBot
 {
@@ -28,6 +29,22 @@ namespace Microsoft.Bot.Sample.LuisBot
             // check if activity is of type message
             if (activity.GetActivityType() == ActivityTypes.Message)
             {
+                var mentions = activity.GetMentions()?.ToList();
+                var message = activity.Text;
+
+                foreach (var mention in mentions)
+                {
+                    if(mention.Mentioned.Id == activity.Recipient.Id)
+                    {
+                        if (!string.IsNullOrWhiteSpace(mention.Text))
+                        {
+                            message = message.Replace(mention.Text, string.Empty);
+                        }
+                    }
+                }
+
+                activity.Text = message;
+
                 await Conversation.SendAsync(activity, () => new BasicLuisDialog());
 
                 // The following is for FormFlow dialog.
