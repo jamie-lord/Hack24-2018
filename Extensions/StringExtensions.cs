@@ -25,7 +25,7 @@ namespace LuisBot.Extensions
         /// </summary>
         /// <param name="numberString">String worded number representation</param>
         /// <returns>long version of word representation</returns>
-        public static long ToLong(string numberString)
+        public static long ToLong(this string numberString)
         {
             var numbers = Regex.Matches(numberString, @"\w+").Cast<Match>()
                  .Select(m => m.Value.ToLowerInvariant())
