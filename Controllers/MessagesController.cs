@@ -26,15 +26,19 @@ namespace Microsoft.Bot.Sample.LuisBot
             {
                 var mentions = activity.GetMentions()?.ToList();
                 var message = activity.Text;
-                bool shouldReply = activity.Conversation.IsGroup.HasValue ? activity.Conversation.IsGroup.Value : false;
-                foreach (var mention in mentions)
+                bool shouldReply = activity.Conversation.IsGroup.HasValue ? !activity.Conversation.IsGroup.Value : true;
+
+                if (!shouldReply)
                 {
-                    if(mention.Mentioned.Id == activity.Recipient.Id)
+                    foreach (var mention in mentions)
                     {
-                        if (!string.IsNullOrWhiteSpace(mention.Text))
+                        if (mention.Mentioned.Id == activity.Recipient.Id)
                         {
-                            message = message.Replace(mention.Text, string.Empty).Trim();
-                            shouldReply = true;
+                            if (!string.IsNullOrWhiteSpace(mention.Text))
+                            {
+                                message = message.Replace(mention.Text, string.Empty).Trim();
+                                shouldReply = true;
+                            }
                         }
                     }
                 }
