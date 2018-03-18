@@ -13,11 +13,6 @@ namespace Microsoft.Bot.Sample.LuisBot
     [BotAuthentication]
     public class MessagesController : ApiController
     {
-        internal static IDialog<UserDetail> MakeUserDetailDialog()
-        {
-            return Chain.From(() => FormDialog.FromForm(UserDetail.BuildForm));
-        }
-
         /// <summary>
         /// POST: api/Messages
         /// receive a message from a user and send replies
@@ -31,7 +26,7 @@ namespace Microsoft.Bot.Sample.LuisBot
             {
                 var mentions = activity.GetMentions()?.ToList();
                 var message = activity.Text;
-                bool mentioned = false;
+                bool shouldReply = activity.Conversation.IsGroup.HasValue ? activity.Conversation.IsGroup.Value : false;
                 foreach (var mention in mentions)
                 {
                     if(mention.Mentioned.Id == activity.Recipient.Id)
@@ -39,19 +34,17 @@ namespace Microsoft.Bot.Sample.LuisBot
                         if (!string.IsNullOrWhiteSpace(mention.Text))
                         {
                             message = message.Replace(mention.Text, string.Empty).Trim();
-                            mentioned = true;
+                            shouldReply = true;
                         }
                     }
                 }
 
                 activity.Text = message;
 
-                if (mentioned)
+                if (shouldReply)
+                {
                     await Conversation.SendAsync(activity, () => new BasicLuisDialog());
-
-                // The following is for FormFlow dialog.
-                // TODO: uncomment when we can
-                //await Conversation.SendAsync(activity, MakeUserDetailDialog);
+                }
             }
             else
             {
