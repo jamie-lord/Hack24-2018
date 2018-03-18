@@ -239,9 +239,13 @@
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="Dialogs\MillionaireGame.cs" />
     <Compile Include="EntityFrameworkActivityLogger.cs" />
+    <Compile Include="Extensions\MessageExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\UnsortedExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\GifHelpers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
