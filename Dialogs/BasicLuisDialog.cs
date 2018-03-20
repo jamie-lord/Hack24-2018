@@ -5,8 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AdaptiveCards;
-using LuisBot.Extensions;
-
+using LuisBot.Helpers;
 using LuisBot.Models;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.FormFlow;
