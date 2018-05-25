@@ -37,7 +37,7 @@ namespace SimpleEchoBot
                     containerBuilder.RegisterType<EntityFrameworkActivityLogger>().AsImplementedInterfaces().InstancePerDependency();
                     containerBuilder.RegisterModule(new AzureModule(Assembly.GetExecutingAssembly()));
 #if DEBUG
-                    ConfigurationManager.AppSettings["LuisAppId"] = "fc5a8123-58b1-45ce-9e97-1e3d03869a72";
+                    ConfigurationManager.AppSettings["LuisAppId"] = "7c338de1-d1e0-45ac-b44d-290f68f5a008";
                     ConfigurationManager.AppSettings["LuisAPIKey"] = "462b9fade9d2421890f561b307c81e25";
                     ConfigurationManager.AppSettings["LuisAPIHostName"] = "westeurope.api.cognitive.microsoft.com";
 #else

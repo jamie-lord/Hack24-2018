@@ -1,11 +1,15 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using AdaptiveCards;
-using LuisBot.Helpers;
+using GiphyDotNet.Manager;
+using GiphyDotNet.Model.Parameters;
 using LuisBot.Models;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.FormFlow;
@@ -13,7 +17,6 @@ using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
 using SqlDataStore.Models;
-
 
 namespace Microsoft.Bot.Sample.LuisBot
 {
@@ -28,21 +31,30 @@ namespace Microsoft.Bot.Sample.LuisBot
         {
         }
 
-        #region Intents
         [LuisIntent("")]
         [LuisIntent("None")]
         public async Task NoneIntent(IDialogContext context, LuisResult result)
         {
+            var resultMessage = context.MakeMessage();
+
+            string image = await GetGif("say what");
+
             StringBuilder noComprendeSB = new StringBuilder("Sorry, I didn't understand");
             if (!string.IsNullOrWhiteSpace(result?.Query))
             {
                 noComprendeSB.Append($" what you meant when you said \"{result.Query}\"");
             }
 
-            if (!await context.TryPostGifAsync("say what", "Oops I didn't understand"))
+            if (!string.IsNullOrWhiteSpace(image))
+            {
+                resultMessage.Attachments.Add(new AnimationCard(title: "Ooops", subtitle: noComprendeSB.ToString(), media: new List<MediaUrl> { new MediaUrl(image) }).ToAttachment());
+            }
+            else
             {
                 await context.PostAsync(noComprendeSB.ToString());
             }
+
+            await context.PostAsync(resultMessage);
 
             await context.PostAsync("Please try a different term or phrase.");
         }
@@ -52,50 +64,74 @@ namespace Microsoft.Bot.Sample.LuisBot
         [LuisIntent("Greeting")]
         public async Task GreetingIntent(IDialogContext context, LuisResult result)
         {
-            await context.TryPostGifAsync("porg", "Hi I'm PorgBot!");
-        }       
+            var resultMessage = context.MakeMessage();
+
+            string image = await GetGif("porg");
+
+            if (!string.IsNullOrWhiteSpace(image))
+            {
+                resultMessage.Attachments.Add(new AnimationCard(media: new List<MediaUrl> { new MediaUrl(image) }, title: "Hi I'm PorgBot!").ToAttachment());
+            }
+
+            await context.PostAsync(resultMessage);
+        }
+
+        private async Task<string> GetGif(string searchFor)
+        {
+            try
+            {
+                var giphy = new Giphy("oZy0HYzaXNCmrq0dNOGyiuZgyaaTc3hL");
+                var searchParameter = new SearchParameter()
+                {
+                    Query = searchFor
+                };
+                // Returns gif results
+                var gifResult = await giphy.GifSearch(searchParameter);
+                return gifResult.Data?[new Random().Next(0, gifResult.Data.Length + 1)]?.Images.Original.Url;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return null;
+        }
 
         [LuisIntent("Cancel")]
         public async Task CancelIntent(IDialogContext context, LuisResult result)
         {
-            await ShowLuisResult(context, result);
+            await this.ShowLuisResult(context, result);
         }
 
         [LuisIntent("Help")]
         public async Task HelpIntent(IDialogContext context, LuisResult result)
         {
-            await ShowLuisResult(context, result);
+            await this.ShowLuisResult(context, result);
         }
 
         [LuisIntent("Image/Gif")]
         public async Task ImageIntent(IDialogContext context, LuisResult result)
         {
-            var quantityQueryStr = result.Entities.FirstOrDefault(e => e.Type.ToLowerInvariant().CompareTo("builtin.number") == 0)?.Entity;
-            var imageQuery = result.Entities.FirstOrDefault(e => e.Type.ToLowerInvariant().CompareTo("image") == 0)?.Entity;
+            var resultMessage = context.MakeMessage();
 
-            string titleComment = $"Here's a {imageQuery}";
+            string image = null;
+            var query = result.Entities.FirstOrDefault()?.Entity;
 
-            int quantityQuery = -1;
-            if (!string.IsNullOrWhiteSpace(quantityQueryStr))
+            if (!string.IsNullOrWhiteSpace(query))
             {
-                if (!Int32.TryParse(quantityQueryStr, out quantityQuery))
-                {
-                    quantityQuery = (int)quantityQueryStr.ToLong();
-                }
-
-                if (quantityQuery > 0)
-                {
-                    titleComment = $"Here are some {imageQuery}";
-                }
+                image = await GetGif(query);
             }
 
-            if (!await context.TryPostGifAsync(imageQuery, titleComment))
+            if (string.IsNullOrWhiteSpace(image))
             {
-                var resultMessage = context.MakeMessage();
                 resultMessage.Text = "Hmmmm, I couldn't find an image for that. Sorry";
-                await context.PostAsync(resultMessage);
+            }
+            else
+            {
+                resultMessage.Attachments.Add(new AnimationCard { Media = new List<MediaUrl> { new MediaUrl(image) }, Title = "Looks like a " + query + " to me" }.ToAttachment());
             }
 
+            await context.PostAsync(resultMessage);
         }
 
         [LuisIntent("Show me your horse")]
@@ -132,7 +168,7 @@ namespace Microsoft.Bot.Sample.LuisBot
 
                     foreach (var creditCard in creditCards)
                     {
-                        var adaptiveCard = creditCard.CreateAdaptiveCard();
+                        var adaptiveCard = CreditCardFactory(creditCard);
                         Attachment attachment = new Attachment()
                         {
                             ContentType = AdaptiveCard.ContentType,
@@ -151,11 +187,61 @@ namespace Microsoft.Bot.Sample.LuisBot
             }
         }
 
+        private AdaptiveCard CreditCardFactory(CreditCard creditCard)
+        {
+            AdaptiveCard card = new AdaptiveCard()
+            {
+                Body = new List<AdaptiveElement>
+                {
+                    new AdaptiveContainer()
+                    {
+                        SelectAction = new AdaptiveOpenUrlAction()
+                        {
+                            Url = new Uri(creditCard.Link)
+                        },
+                        Items = new List<AdaptiveElement>
+                        {
+                            new AdaptiveTextBlock(creditCard.Name) {Size = AdaptiveTextSize.Large, Color = AdaptiveTextColor.Dark, Weight = AdaptiveTextWeight.Bolder},
+                            new AdaptiveImage(creditCard.ImageUrl) {Size = AdaptiveImageSize.Large, Spacing = AdaptiveSpacing.Padding},
+                            new AdaptiveTextBlock("Annual fee: **£" +  creditCard.AnnualFee.ToString() + "**"),
+                            new AdaptiveColumnSet() {Columns = new List<AdaptiveColumn>
+                            {
+                                new AdaptiveColumn() {Items = new List<AdaptiveElement>
+                                {
+                                    new AdaptiveTextBlock("Purchase APR: **" + creditCard.PurchaseApr.ToString() + "%**")
+                                }},
+                                new AdaptiveColumn()
+                                {
+                                    Items = new List<AdaptiveElement>
+                                    {
+                                        new AdaptiveImage("https://images.experian.co.uk/rebrand//experian_full_colour.svg") {Size = AdaptiveImageSize.Medium, Spacing = AdaptiveSpacing.Padding, HorizontalAlignment = AdaptiveHorizontalAlignment.Right}
+                                    },
+
+                                }
+                            }}
+                        }
+                    }
+                },
+                Actions = new List<AdaptiveAction>
+                {
+                    new AdaptiveOpenUrlAction()
+                    {
+                        Url = new Uri(creditCard.Link),
+                        Title = "See more details"
+                    }
+                }
+            };
+            return card;
+        }
 
         [LuisIntent("Farewells")]
         public async Task FareWellIntent(IDialogContext context, LuisResult result)
         {
-            await context.TryPostGifAsync("Bye!", "Bye!");
+            LuisResult luisResult = new LuisResult("Bye!", new List<EntityRecommendation>()
+            {
+                new EntityRecommendation { Entity = "Bye!" }
+            });
+            await ImageIntent(context, luisResult);
         }
 
         [LuisIntent("StartSalaryQuery")]
@@ -174,8 +260,7 @@ namespace Microsoft.Bot.Sample.LuisBot
             {
                 new EntityRecommendation { Entity = "Saw play a game" }
             });
-
-            await context.TryPostGifAsync("saw play a game");
+            await ImageIntent(context, luisResult);
 
             var formDialog = new FormDialog<MillionaireGame>(new MillionaireGame(), MillionaireGame.BuildForm, FormOptions.PromptInStart, result.Entities);
             context.Call(formDialog, ResumeAfterGameDialog);
@@ -187,8 +272,11 @@ namespace Microsoft.Bot.Sample.LuisBot
             {
                 var gameQuery = await result;
                 await context.PostAsync("Thanks for playing!");
-
-                await context.TryPostGifAsync("Congratulations!");
+                LuisResult luisResult = new LuisResult("Congratulations!", new List<EntityRecommendation>()
+                {
+                    new EntityRecommendation { Entity = "Congratulations!" }
+                });
+                await ImageIntent(context, luisResult);
             }
             catch (FormCanceledException e)
             {
@@ -201,18 +289,12 @@ namespace Microsoft.Bot.Sample.LuisBot
                 {
                     await context.PostAsync($"Oh dear oh dear. You couldn't get past question {questionStep}!");
                 }
-                else
-                {
-                    await context.PostAsync("You failed!");
-                }
             }
             finally
             {
                 context.Done<object>(null);
             }
         }
-        #endregion
-
         private async Task ResumeAfterSalaryQueryDialog(IDialogContext context, IAwaitable<UserDetail> result)
         {
             try
@@ -231,10 +313,10 @@ namespace Microsoft.Bot.Sample.LuisBot
                                   userDetail.Location.ToLower().Contains(salaryQuery.Location.ToLower())
                             select userDetail;
 
-                    similarJobs = q.Where(j => j.Id != salaryQuery.Id).ToList();
+                    similarJobs = q.ToList();
                 }
 
-                if (similarJobs != null && similarJobs.Any())
+                if (similarJobs != null && similarJobs.Count() > 0)
                 {
                     await context.PostAsync("Nice! Looks like we've found some people in your area that do the same thing as you.");
 
@@ -261,8 +343,8 @@ namespace Microsoft.Bot.Sample.LuisBot
                 }
                 else
                 {
-                    await context.PostAsync("Your PorgPowered survey has been successfully completed. " +
-                        "Thanks for using PorgPowered salary bot. We'll be in touch to let you know how you rank! :)");
+                    await context.PostAsync(
+                        "Your PorgPowered survey has been successfully completed. You will get a confirmation email and SMS. Thanks for using PorgPowered salary bot, Welcome Again And May The Porg Be With you!!! :)");
                 }
             }
             catch (FormCanceledException ex)

@@ -54,7 +54,7 @@ namespace Microsoft.Bot.Sample.LuisBot
         [Prompt("Question 4: Which of these means adequate space for moving in? {||}")]
         public QuestionFourEnum QuestionFour { get; set; }
 
-        [Prompt("Question 5: How is a play on words commonly described? {||}")]
+        [Prompt("How is a play on words commonly described? {||}")]
         public QuestionFiveEnum QuestionFive { get; set; }
         
 
